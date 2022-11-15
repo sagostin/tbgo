@@ -1,6 +1,6 @@
 package sbc
 
-type CallRateLimiting struct {
+type NapCallRateLimiting struct {
 	ProcessingDelayHighThreshold     string `json:"processing_delay_high_threshold,omitempty"`
 	MaximumCallsPerSecond            int    `json:"maximum_calls_per_second,omitempty"`
 	MaximumCallBurst                 int    `json:"maximum_call_burst,omitempty"`
@@ -12,79 +12,81 @@ type CallRateLimiting struct {
 	ProcessingDelayLowThreshold      string `json:"processing_delay_low_threshold,omitempty"`
 }
 
-type Nap struct {
-	Name                string           `json:"name,omitempty"`
-	CallRateLimiting    CallRateLimiting `json:"call_rate_limiting,omitempty"`
-	Enabled             bool             `json:"enabled,omitempty"`
-	DefaultProfile      string           `json:"default_profile,omitempty"`
-	PortRanges          []string         `json:"port_ranges,omitempty"`
-	SipTransportServers []string         `json:"sip_transport_servers,omitempty"`
-	SipCfg              struct {
-		PollRemoteProxy           bool `json:"poll_remote_proxy,omitempty"`
-		AcceptOnlyAuthorizedUsers bool `json:"accept_only_authorized_users,omitempty"`
-		RegistrationParameters    struct {
-			AddressToRegister string `json:"address_to_register,omitempty"`
-			RegisterToProxy   bool   `json:"register_to_proxy,omitempty"`
-		} `json:"registration_parameters,omitempty"`
-		SipiParameters struct {
-			IsupProtocolVariant    string `json:"isup_protocol_variant,omitempty"`
-			AppendFToOutgoingCalls bool   `json:"append_f_to_outgoing_calls,omitempty"`
-			Enable                 bool   `json:"enable,omitempty"`
-			ContentType            string `json:"content_type,omitempty"`
-			CallProgressMethod     string `json:"call_progress_method,omitempty"`
-		} `json:"sipi_parameters,omitempty"`
-		AdvancedParameters struct {
-			MapAnyResponseToAvailableStatus bool   `json:"map_any_response_to_available_status,omitempty"`
-			ResponseTimeout                 string `json:"response_timeout,omitempty"`
-			PrivacyType                     string `json:"privacy_type,omitempty"`
-			ProxyPollingMaxForwards         int    `json:"proxy_polling_max_forwards,omitempty"`
-			TriggersCallProgress            bool   `json:"183_triggers_call_progress,omitempty"`
-		} `json:"advanced_parameters,omitempty"`
-		ProxyPortType       string        `json:"proxy_port_type,omitempty"`
-		NapSipAcls          []interface{} `json:"nap_sip_acls,omitempty"`
-		SipUseProxy         bool          `json:"sip_use_proxy,omitempty"`
-		ProxyPort           int           `json:"proxy_port,omitempty"`
-		FilteringParameters struct {
-			FilterByProxyPort    bool `json:"filter_by_proxy_port,omitempty"`
-			FilterByLocalPort    bool `json:"filter_by_local_port,omitempty"`
-			FilterByProxyAddress bool `json:"filter_by_proxy_address,omitempty"`
-		} `json:"filtering_parameters,omitempty"`
-		ProxyPollingInterval     string `json:"proxy_polling_interval,omitempty"`
-		ProxyAddress             string `json:"proxy_address,omitempty"`
-		AuthenticationParameters struct {
-			User           string `json:"user,omitempty"`
-			Realm          string `json:"realm,omitempty"`
-			ReuseChallenge bool   `json:"reuse_challenge,omitempty"`
-			Password       string `json:"password,omitempty"`
-			IgnoreRealm    bool   `json:"ignore_realm,omitempty"`
-		} `json:"authentication_parameters,omitempty"`
-		NetworkAddressTranslation struct {
-			RemoteMethodSip string `json:"remote_method_sip,omitempty"`
-			LocalMethodRtp  string `json:"local_method_rtp,omitempty"`
-			RemoteMethodRtp string `json:"remote_method_rtp,omitempty"`
-			LocalMethodSip  string `json:"local_method_sip,omitempty"`
-		} `json:"network_address_translation,omitempty"`
-	} `json:"sip_cfg,omitempty"`
-	CongestionThreshold struct {
-		PeriodDuration   string `json:"period_duration,omitempty"`
-		NbCallsPerPeriod int    `json:"nb_calls_per_period,omitempty"`
-	} `json:"congestion_threshold,omitempty"`
+type NapRegistrationParams struct {
+	AddressToRegister string `json:"address_to_register,omitempty"`
+	RegisterToProxy   bool   `json:"register_to_proxy,omitempty"`
 }
 
-/*func (n *Nap) Get(sbc Cfg) (*Nap, error) {
-	http, err := GetHttp(sbc.Host, "/configurations/"+sbc.Config+"/naps/"+n.Name, sbc.User, sbc.Password)
-	if err != nil {
-		return nil, err
-	}
-	log.Info(string(http))
+type NapSipiParams struct {
+	IsupProtocolVariant    string `json:"isup_protocol_variant,omitempty"`
+	AppendFToOutgoingCalls bool   `json:"append_f_to_outgoing_calls,omitempty"`
+	Enable                 bool   `json:"enable,omitempty"`
+	ContentType            string `json:"content_type,omitempty"`
+	CallProgressMethod     string `json:"call_progress_method,omitempty"`
+}
 
-	var nap *Nap
-	err = json.Unmarshal(http, &nap)
-	if err != nil {
-		return nil, err
-	}
-	return nap, nil
-}*/
+type NapAdvancedParams struct {
+	MapAnyResponseToAvailableStatus bool   `json:"map_any_response_to_available_status,omitempty"`
+	ResponseTimeout                 string `json:"response_timeout,omitempty"`
+	PrivacyType                     string `json:"privacy_type,omitempty"`
+	ProxyPollingMaxForwards         int    `json:"proxy_polling_max_forwards,omitempty"`
+	TriggersCallProgress            bool   `json:"183_triggers_call_progress,omitempty"`
+}
+
+type NapFilterParams struct {
+	FilterByProxyPort    bool `json:"filter_by_proxy_port,omitempty"`
+	FilterByLocalPort    bool `json:"filter_by_local_port,omitempty"`
+	FilterByProxyAddress bool `json:"filter_by_proxy_address,omitempty"`
+}
+
+type NapAuthParams struct {
+	User           string `json:"user,omitempty"`
+	Realm          string `json:"realm,omitempty"`
+	ReuseChallenge bool   `json:"reuse_challenge,omitempty"`
+	Password       string `json:"password,omitempty"`
+	IgnoreRealm    bool   `json:"ignore_realm,omitempty"`
+}
+
+type NapNatParams struct {
+	RemoteMethodSip string `json:"remote_method_sip,omitempty"`
+	LocalMethodRtp  string `json:"local_method_rtp,omitempty"`
+	RemoteMethodRtp string `json:"remote_method_rtp,omitempty"`
+	LocalMethodSip  string `json:"local_method_sip,omitempty"`
+}
+
+type NapSipCfg struct {
+	PollRemoteProxy           bool                  `json:"poll_remote_proxy,omitempty"`
+	AcceptOnlyAuthorizedUsers bool                  `json:"accept_only_authorized_users,omitempty"`
+	RegistrationParameters    NapRegistrationParams `json:"registration_parameters,omitempty"`
+	SipiParameters            NapSipiParams         `json:"sipi_parameters,omitempty"`
+	AdvancedParameters        NapAdvancedParams     `json:"advanced_parameters,omitempty"`
+	ProxyPortType             string                `json:"proxy_port_type,omitempty"`
+	NapSipAcls                []interface{}         `json:"nap_sip_acls,omitempty"`
+	SipUseProxy               bool                  `json:"sip_use_proxy,omitempty"`
+	ProxyPort                 int                   `json:"proxy_port,omitempty"`
+	FilteringParameters       NapFilterParams       `json:"filtering_parameters,omitempty"`
+	ProxyPollingInterval      string                `json:"proxy_polling_interval,omitempty"`
+	ProxyAddress              string                `json:"proxy_address,omitempty"`
+	AuthenticationParameters  NapAuthParams         `json:"authentication_parameters,omitempty"`
+	NetworkAddressTranslation NapNatParams          `json:"network_address_translation,omitempty"`
+}
+
+type NapCongestionThreshold struct {
+	PeriodDuration   string `json:"period_duration,omitempty"`
+	NbCallsPerPeriod int    `json:"nb_calls_per_period,omitempty"`
+}
+
+// Nap GET /configurations/config_1/naps/pbx_dec0de/
+type Nap struct {
+	Name                string                 `json:"name,omitempty"`
+	CallRateLimiting    NapCallRateLimiting    `json:"call_rate_limiting,omitempty"`
+	Enabled             bool                   `json:"enabled,omitempty"`
+	DefaultProfile      string                 `json:"default_profile,omitempty"`
+	PortRanges          []string               `json:"port_ranges,omitempty"`
+	SipTransportServers []string               `json:"sip_transport_servers,omitempty"`
+	SipCfg              NapSipCfg              `json:"sip_cfg,omitempty"`
+	CongestionThreshold NapCongestionThreshold `json:"congestion_threshold,omitempty"`
+}
 
 type NapStatus struct {
 	AvailabilityDetectionStruct struct {
@@ -210,18 +212,3 @@ type NapStatus struct {
 	InstIncomingCallRateAcceptedHighest int    `json:"inst_incoming_call_rate_accepted_highest,omitempty"`
 	InstIncomingCallRateHighest         int    `json:"inst_incoming_call_rate_highest,omitempty"`
 }
-
-/*func (n *NapStatus) Get(sbc Cfg, nap Nap) (*NapStatus, error) {
-	http, err := GetHttp(sbc.Host, "/configurations/"+sbc.Config+"/naps/"+nap.Name, sbc.User, sbc.Password)
-	if err != nil {
-		return nil, err
-	}
-	log.Info(string(http))
-
-	var napStatus *NapStatus
-	err = json.Unmarshal(http, &nap)
-	if err != nil {
-		return nil, err
-	}
-	return napStatus, nil
-}*/
