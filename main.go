@@ -52,7 +52,12 @@ func main() {
 	// init the http client constructor thingy 🤪
 	client := sbc.NewClient(cfg)
 
-	client.TBFileDBs().Get("config_1")
+	// todo implement ability to download the routedef and such.
+	names, err := client.TBFileDBs().GetDigitMapsNames("config_1")
+	if err != nil {
+		return
+	}
+	log.Printf("%s", names)
 
 	/*	_, err := client.TBConfigs().GetConfig("config_1")
 		if err != nil {
