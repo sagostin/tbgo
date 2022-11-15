@@ -53,33 +53,11 @@ func main() {
 	client := sbc.NewClient(cfg)
 
 	// todo implement ability to download the routedef and such.
-	names, err := client.TBFileDBs().GetDigitMapsNames("config_1")
+	names, err := client.TBFileDBs("File_DB").GetDigitMapsNames("config_1")
 	if err != nil {
 		return
 	}
 	log.Printf("%s", names)
-
-	/*	_, err := client.TBConfigs().GetConfig("config_1")
-		if err != nil {
-			return
-		}
-
-		naps, err := client.TBNaps().GetNap("config_1", "pbx_dec0de")
-		if err != nil {
-			log.Error(err)
-		}
-
-		marshal, err := json.Marshal(naps)
-		if err != nil {
-			return
-		}
-
-		pretty, err := prettyJson(marshal)
-		if err != nil {
-			return
-		}
-
-		log.Printf("%s", pretty)*/
 }
 
 func prettyJson(data []byte) (string, error) {

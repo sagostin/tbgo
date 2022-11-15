@@ -10,18 +10,20 @@ import (
 // TBFileDBs client
 type TBFileDBs struct {
 	Client
+	fileDbPath string
 }
 
 // TBFileDBs constructor (from Client)
-func (c Client) TBFileDBs() TBFileDBs {
+func (c Client) TBFileDBs(fileDb string) TBFileDBs {
 	return TBFileDBs{
 		Client: c,
+		// todo why do they do /file_dbs/File_DB... can you even have multiple?? wot? or is it config based?
+		fileDbPath: fileDb,
 	}
 }
 
 func (c TBFileDBs) Get(config string) (*Nap, error) {
-	// todo why do they do /file_dbs/File_DB... can you even have multiple?? wot? or is it config based?
-	err := c.Client.Request("GET", "/configurations/"+config+"/file_dbs/File_DB", nil, nil)
+	err := c.Client.Request("GET", "/configurations/"+config+"/file_dbs/"+c.fileDbPath, nil, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -30,7 +32,7 @@ func (c TBFileDBs) Get(config string) (*Nap, error) {
 
 func (c TBFileDBs) GetCustomFileNames(config string) ([]string, error) {
 	d := make(map[string]json.RawMessage)
-	err := c.Client.Request("GET", "/configurations/"+config+"/file_dbs/File_DB/custom_files", nil, &d)
+	err := c.Client.Request("GET", "/configurations/"+config+"/file_dbs/"+c.fileDbPath+"/custom_files", nil, &d)
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +56,7 @@ func (c TBFileDBs) GetCustomFileNames(config string) ([]string, error) {
 func (c TBFileDBs) GetRouteDefsNames(config string) ([]string, error) {
 	// dec0de_routedef%2Ecsv
 	d := make(map[string]json.RawMessage)
-	err := c.Client.Request("GET", "/configurations/"+config+"/file_dbs/File_DB/routesets_definitions/", nil, &d)
+	err := c.Client.Request("GET", "/configurations/"+config+"/file_dbs/"+c.fileDbPath+"/routesets_definitions/", nil, &d)
 	if err != nil {
 		return nil, err
 	}
@@ -77,7 +79,7 @@ func (c TBFileDBs) GetRouteDefsNames(config string) ([]string, error) {
 
 func (c TBFileDBs) GetDigitMapsNames(config string) ([]string, error) {
 	d := make(map[string]json.RawMessage)
-	err := c.Client.Request("GET", "/configurations/"+config+"/file_dbs/File_DB/routesets_digitmaps/", nil, &d)
+	err := c.Client.Request("GET", "/configurations/"+config+"/file_dbs/"+c.fileDbPath+"/routesets_digitmaps/", nil, &d)
 	if err != nil {
 		return nil, err
 	}
