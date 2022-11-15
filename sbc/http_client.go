@@ -141,7 +141,6 @@ func (c Client) Request(method, endpoint string, data, response interface{}) err
 			}
 		}
 	} else {
-
 		var prettyJSON bytes.Buffer
 		error := json.Indent(&prettyJSON, body, "", "\t")
 		if error != nil {
