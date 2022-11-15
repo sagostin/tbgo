@@ -6,6 +6,53 @@ import (
 )
 
 /*
+potential paths
+
+"date_time_services": {},
+        "dns_groups": {},
+        "notes": "",
+        "dns_services": {},
+        "hosts": {},
+        "host_ip_interfaces": {},
+        "certificates": {},
+        "profiles": {},
+        "routing_scripts": {},
+        "gateways": {},
+        "tls_profiles": {},
+        "telephony_services": {},
+        "radius_clients": {},
+        "http_services": {},
+        "validation_status": "Successful",
+        "file_dbs": {},
+        "sip_stacks": {},
+        "firewalls": {},
+        "host_virtual_ports": {},
+        "np1_groups": {},
+        "radius_servers": {},
+        "user_tone_definition_profiles": {},
+        "nap_columns": {},
+        "privilege_level": 0,
+        "applications": {},
+        "sip_emergency_cfgs": {},
+        "nat_traversals": {},
+        "snmp_services": {},
+        "nap_columns_values": {},
+        "host_port_ranges": {},
+        "sip_registration_domains": {},
+        "ssh_services": {},
+        "sig_memory_schemes": [],
+        "unapplied_changes": false,
+        "naps": {},
+        "icmp_services": {},
+        "hardware_units": {},
+        "sip_header_manipulation_cfgs": {},
+        "routes": {},
+        "route_columns": {},
+        "internal_nats": {},
+        "lawful_interceptions": {},
+*/
+
+/*
 TODO
 - Ability to copy and load new template based on current newest configuration
 - After applying the configuration, activate it, but don't delete the old configuration

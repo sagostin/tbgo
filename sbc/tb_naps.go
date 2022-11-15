@@ -17,6 +17,17 @@ func (c Client) TBNaps() TBNaps {
 	}
 }
 
+func (c TBNaps) GetNap(config string, napName string) (*Nap, error) {
+	var nap *Nap
+
+	err := c.Client.Request("GET", "/configurations/"+config+"/naps/"+napName+"/", nil, &nap)
+	if err != nil {
+		return nil, err
+	}
+
+	return nap, nil
+}
+
 func (c TBNaps) GetNames(config string) ([]string, error) {
 	d := make(map[string]json.RawMessage)
 

@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"flag"
 	log "github.com/sirupsen/logrus"
 	"tbgo/sbc"
@@ -50,10 +52,36 @@ func main() {
 	// init the http client constructor thingy 🤪
 	client := sbc.NewClient(cfg)
 
-	naps, err := client.TBNaps().GetNames("config_1")
-	if err != nil {
-		log.Error(err)
-	}
+	client.TBFileDBs().Get("config_1")
 
-	log.Printf("%s", naps)
+	/*	_, err := client.TBConfigs().GetConfig("config_1")
+		if err != nil {
+			return
+		}
+
+		naps, err := client.TBNaps().GetNap("config_1", "pbx_dec0de")
+		if err != nil {
+			log.Error(err)
+		}
+
+		marshal, err := json.Marshal(naps)
+		if err != nil {
+			return
+		}
+
+		pretty, err := prettyJson(marshal)
+		if err != nil {
+			return
+		}
+
+		log.Printf("%s", pretty)*/
+}
+
+func prettyJson(data []byte) (string, error) {
+	var prettyJSON bytes.Buffer
+	error := json.Indent(&prettyJSON, data, "", "\t")
+	if error != nil {
+		return "", error
+	}
+	return string(prettyJSON.Bytes()), nil
 }
