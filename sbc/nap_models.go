@@ -76,14 +76,15 @@ type NapCongestionThreshold struct {
 	NbCallsPerPeriod int    `json:"nb_calls_per_period,omitempty"`
 }
 
+// NapColumnValues change to your custom Column Values that you may have
 type NapColumnValues struct {
-	RoutesetsDefinition string `json:"routesets_definition"`
-	RouteGroups         string `json:"route_groups"`
-	RoutesetsDigitmap   string `json:"routesets_digitmap"`
-	Weight              string `json:"weight"`
-	BlackWhiteList      string `json:"black_white_list"`
-	CalledPreRemap      string `json:"called_pre_remap"`
-	Priority            string `json:"priority"`
+	RoutesetsDefinition string `json:"routesets_definition,omitempty"`
+	RouteGroups         string `json:"route_groups,omitempty"`
+	RoutesetsDigitmap   string `json:"routesets_digitmap,omitempty"`
+	Weight              string `json:"weight,omitempty"`
+	BlackWhiteList      string `json:"black_white_list,omitempty"`
+	CalledPreRemap      string `json:"called_pre_remap,omitempty"`
+	Priority            string `json:"priority,omitempty"`
 }
 
 // Nap GET /configurations/config_1/naps/pbx_dec0de/

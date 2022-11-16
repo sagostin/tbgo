@@ -17,6 +17,14 @@ func (c Client) TBNapColumnsValues() TBNapColumnsValues {
 	}
 }
 
+func (c TBNapColumnsValues) UpdateNapColumnValues(config string, napName string, values NapColumnValues) error {
+	err := c.Client.Request("PUT", "/configurations/"+config+"/nap_columns_values/"+napName, values, nil)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 /*
 "routesets_definition": {},
 "route_groups": {},

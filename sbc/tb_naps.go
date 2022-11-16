@@ -52,3 +52,11 @@ func (c TBNaps) GetNames(config string) ([]string, error) {
 
 	return k, nil
 }
+
+func (c TBNaps) CreateNap(config string, nap Nap) error {
+	err := c.Client.Request("POST", "/configurations/"+config+"/naps/", nap, nil)
+	if err != nil {
+		return err
+	}
+	return nil
+}

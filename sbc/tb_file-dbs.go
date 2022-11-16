@@ -53,7 +53,7 @@ func (c TBFileDBs) GetCustomFileNames(config string) ([]string, error) {
 	return k, nil
 }
 
-func (c TBFileDBs) GetRouteDefsNames(config string) ([]string, error) {
+func (c TBFileDBs) GetRouteDefNames(config string) ([]string, error) {
 	// dec0de_routedef%2Ecsv
 	d := make(map[string]json.RawMessage)
 	err := c.Client.Request("GET", "/configurations/"+config+"/file_dbs/"+c.fileDbPath+"/routesets_definitions/", nil, &d)
@@ -96,8 +96,49 @@ func (c TBFileDBs) GetDigitMapsNames(config string) ([]string, error) {
 		k[i] = s
 		i++
 	}
-
 	return k, nil
+}
+
+func (c TBFileDBs) GetDigitMap(config string, dMap string) (*TBFile, error) {
+	var file *TBFile
+	err := c.Client.Request("GET", "/configurations/"+config+"/file_dbs/"+
+		c.fileDbPath+"/routesets_digitmaps/"+strings.ReplaceAll(dMap, ".", "%2E"),
+		nil, &file)
+	if err != nil {
+		return file, err
+	}
+	return file, nil
+}
+
+func (c TBFileDBs) UpdateDigitMap(config string, digitMap string) error {
+	err := c.Client.Request("PUT", "/configurations/"+config+"/file_dbs/"+
+		c.fileDbPath+"/routesets_digitmaps/"+strings.ReplaceAll(digitMap, ".", "%2E"),
+		digitMap, nil)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (c TBFileDBs) GetRouteDef(config string, rDef string) (*TBFile, error) {
+	var file *TBFile
+	err := c.Client.Request("GET", "/configurations/"+config+"/file_dbs/"+
+		c.fileDbPath+"/routesets_definitions/"+strings.ReplaceAll(rDef, ".", "%2E"),
+		nil, &file)
+	if err != nil {
+		return file, err
+	}
+	return file, nil
+}
+
+func (c TBFileDBs) CreateRouteDef(config string, rDef string, file TBFile) error {
+	err := c.Client.Request("POST", "/configurations/"+config+"/file_dbs/"+
+		c.fileDbPath+"/routesets_definitions/"+strings.ReplaceAll(rDef, ".", "%2E"),
+		file, nil)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 /*
