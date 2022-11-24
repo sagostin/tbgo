@@ -122,6 +122,7 @@ func (c TBFileDBs) UpdateDigitMap(config string, digitMap string) error {
 
 func (c TBFileDBs) GetRouteDef(config string, rDef string) (*TBFile, error) {
 	var file *TBFile
+	// File_DB is default?
 	err := c.Client.Request("GET", "/configurations/"+config+"/file_dbs/"+
 		c.fileDbPath+"/routesets_definitions/"+strings.ReplaceAll(rDef, ".", "%2E"),
 		nil, &file)
@@ -132,6 +133,7 @@ func (c TBFileDBs) GetRouteDef(config string, rDef string) (*TBFile, error) {
 }
 
 func (c TBFileDBs) CreateRouteDef(config string, rDef string, file TBFile) error {
+	// File_DB is default?
 	err := c.Client.Request("POST", "/configurations/"+config+"/file_dbs/"+
 		c.fileDbPath+"/routesets_definitions/"+strings.ReplaceAll(rDef, ".", "%2E"),
 		file, nil)
@@ -140,6 +142,8 @@ func (c TBFileDBs) CreateRouteDef(config string, rDef string, file TBFile) error
 	}
 	return nil
 }
+
+//todo update routedef??
 
 /*
 func (c TBFileDBs) GetRadiusDirectories(config string) (*Nap, error) {

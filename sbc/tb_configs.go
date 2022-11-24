@@ -129,3 +129,11 @@ func (c TBConfigs) GetConfig(name string) (*Configuration, error) {
 
 	return config, nil
 }
+
+func (c TBConfigs) GetFullConfig(name string) error {
+	err := c.Client.Request("GET", "/configurations/"+name+"/?recursive=yes", nil, nil)
+	if err != nil {
+		return err
+	}
+	return nil
+}

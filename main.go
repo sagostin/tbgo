@@ -51,7 +51,30 @@ func main() {
 	// init the http client constructor thingy 🤪
 	client := sbc.NewClient(cfg)
 
-	names, err := client.TBNaps().GetNap("config_1", "pbx_dec0de")
+	/*err := client.Request("GET", "/configurations/config_1?recursive=yes", nil, nil)
+	if err != nil {
+		log.Error(err)
+	}*/
+
+	// File_DB is default?
+	def, err := client.TBFileDBs("File_DB").GetDigitMap("config_1", "digitmap_new.csv")
+	if err != nil {
+		log.Error(err)
+	}
+
+	marshal, err := json.Marshal(def)
+	if err != nil {
+		log.Error(err)
+	}
+
+	pretty, err := prettyJson(marshal)
+	if err != nil {
+		log.Error(err)
+	}
+
+	log.Printf("\n" + pretty)
+
+	/*names, err := client.TBNaps().GetNap("config_1", "pbx_dec0de")
 	if err != nil {
 		return
 	}
@@ -59,9 +82,9 @@ func main() {
 	marshal, err := json.Marshal(names)
 	if err != nil {
 		return
-	}
+	}*/
 
-	log.Infof("%s", marshal)
+	/*log.Infof("%s", marshal)*/
 
 	/*	log.Warnf("%s", "Creating NAP")
 
