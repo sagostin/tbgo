@@ -2,6 +2,8 @@ package sbc
 
 import (
 	"encoding/json"
+	"github.com/gocarina/gocsv"
+	log "github.com/sirupsen/logrus"
 	"strings"
 )
 
@@ -99,37 +101,77 @@ func (c TBFileDBs) GetDigitMapsNames(config string) ([]string, error) {
 	return k, nil
 }
 
-func (c TBFileDBs) GetDigitMap(config string, dMap string) (*TBFile, error) {
+func (c TBFileDBs) GetDigitMap(config string, dMap string) ([]*TBDigitMap, error) {
 	var file *TBFile
 	err := c.Client.Request("GET", "/configurations/"+config+"/file_dbs/"+
 		c.fileDbPath+"/routesets_digitmaps/"+strings.ReplaceAll(dMap, ".", "%2E"),
 		nil, &file)
 	if err != nil {
-		return file, err
+		return nil, err
 	}
-	return file, nil
+
+	var digitM []*TBDigitMap
+	reader := *strings.NewReader(file.Content)
+	err = gocsv.Unmarshal(&reader, &digitM)
+	if err != nil {
+		return nil, err
+	}
+
+	return digitM, nil
 }
 
-func (c TBFileDBs) UpdateDigitMap(config string, digitMap string) error {
-	err := c.Client.Request("PUT", "/configurations/"+config+"/file_dbs/"+
-		c.fileDbPath+"/routesets_digitmaps/"+strings.ReplaceAll(digitMap, ".", "%2E"),
-		digitMap, nil)
+func (c TBFileDBs) UpdateDigitMap(config string, digitMapFile string, digitMap []*TBDigitMap) error {
+	file := TBFile{
+		Name: digitMapFile,
+	}
+
+	marsh, err := gocsv.MarshalString(&digitMap)
 	if err != nil {
 		return err
 	}
+
+	formatted := strings.ReplaceAll(marsh, "\n", "\r\n")
+
+	log.Infof("%s", formatted)
+
+	file.Content = formatted
+
+	marshal, err := json.Marshal(file)
+	if err != nil {
+		return err
+	}
+
+	log.Warnf("%s", marshal)
+
+	err = c.Client.Request("PUT", "/configurations/"+config+"/file_dbs/"+
+		c.fileDbPath+"/routesets_digitmaps/"+strings.ReplaceAll(digitMapFile, ".", "%2E"),
+		digitMapFile, nil)
+
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
-func (c TBFileDBs) GetRouteDef(config string, rDef string) (*TBFile, error) {
+func (c TBFileDBs) GetRouteDef(config string, rDef string) ([]*TBRouteDef, error) {
 	var file *TBFile
 	// File_DB is default?
 	err := c.Client.Request("GET", "/configurations/"+config+"/file_dbs/"+
 		c.fileDbPath+"/routesets_definitions/"+strings.ReplaceAll(rDef, ".", "%2E"),
 		nil, &file)
 	if err != nil {
-		return file, err
+		return nil, err
 	}
-	return file, nil
+
+	var routeD []*TBRouteDef
+	reader := *strings.NewReader(file.Content)
+	err = gocsv.Unmarshal(&reader, &routeD)
+	if err != nil {
+		return nil, err
+	}
+
+	return routeD, nil
 }
 
 func (c TBFileDBs) CreateRouteDef(config string, rDef string, file TBFile) error {

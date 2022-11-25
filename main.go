@@ -57,22 +57,57 @@ func main() {
 	}*/
 
 	// File_DB is default?
-	def, err := client.TBFileDBs("File_DB").GetDigitMap("config_1", "digitmap_new.csv")
+	// get digitmap
+	/*def, err := client.TBFileDBs("File_DB").GetDigitMap("config_1", "digitmap_new.csv")
+	if err != nil {
+		log.Error(err)
+	}*/
+
+	var digitMap []*sbc.TBDigitMap
+
+	// create new item
+	newDigitMapping := &sbc.TBDigitMap{
+		Called:       "2508591501",
+		Calling:      "",
+		RouteSetName: "dec0de",
+	}
+
+	// append item
+	digitMap = append(digitMap, newDigitMapping)
+
+	// update digit map
+	err := client.TBFileDBs("File_DB").UpdateDigitMap("config_1", "digitmap_new.csv", digitMap)
 	if err != nil {
 		log.Error(err)
 	}
 
-	marshal, err := json.Marshal(def)
+	// get digitmap
+	getAgain, err := client.TBFileDBs("File_DB").GetDigitMap("config_1", "digitmap_new.csv")
 	if err != nil {
 		log.Error(err)
 	}
 
-	pretty, err := prettyJson(marshal)
+	marshal1, err := json.Marshal(&digitMap)
+	if err != nil {
+		log.Error(err)
+	}
+	marshal2, err := json.Marshal(&getAgain)
 	if err != nil {
 		log.Error(err)
 	}
 
-	log.Printf("\n" + pretty)
+	pretty1, err := prettyJson(marshal1)
+	if err != nil {
+		log.Error(err)
+	}
+
+	pretty2, err := prettyJson(marshal2)
+	if err != nil {
+		log.Error(err)
+	}
+
+	log.Printf("\n" + pretty1)
+	log.Printf("\n" + pretty2)
 
 	/*names, err := client.TBNaps().GetNap("config_1", "pbx_dec0de")
 	if err != nil {
