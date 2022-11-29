@@ -3,7 +3,6 @@ package sbc
 import (
 	"encoding/json"
 	"github.com/gocarina/gocsv"
-	log "github.com/sirupsen/logrus"
 	"strings"
 )
 
@@ -132,20 +131,11 @@ func (c TBFileDBs) UpdateDigitMap(config string, digitMapFile string, digitMap [
 
 	formatted := strings.ReplaceAll(marsh, "\n", "\r\n")
 
-	log.Infof("%s", formatted)
-
 	file.Content = formatted
-
-	marshal, err := json.Marshal(file)
-	if err != nil {
-		return err
-	}
-
-	log.Warnf("%s", marshal)
 
 	err = c.Client.Request("PUT", "/configurations/"+config+"/file_dbs/"+
 		c.fileDbPath+"/routesets_digitmaps/"+strings.ReplaceAll(digitMapFile, ".", "%2E"),
-		digitMapFile, nil)
+		file, nil)
 
 	if err != nil {
 		return err
