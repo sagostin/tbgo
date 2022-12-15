@@ -164,6 +164,31 @@ func (c TBFileDBs) GetRouteDef(config string, rDef string) ([]*TBRouteDef, error
 	return routeD, nil
 }
 
+func (c TBFileDBs) UpdateRouteDef(config string, routeDefFile string, routeDef []*TBRouteDef) error {
+	file := TBFile{
+		Name: routeDefFile,
+	}
+
+	marsh, err := gocsv.MarshalString(&routeDef)
+	if err != nil {
+		return err
+	}
+
+	formatted := strings.ReplaceAll(marsh, "\n", "\r\n")
+
+	file.Content = formatted
+
+	err = c.Client.Request("PUT", "/configurations/"+config+"/file_dbs/"+
+		c.fileDbPath+"/routesets_definitions/"+strings.ReplaceAll(routeDefFile, ".", "%2E"),
+		file, nil)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (c TBFileDBs) CreateRouteDef(config string, rDef string, file TBFile) error {
 	// File_DB is default?
 	err := c.Client.Request("POST", "/configurations/"+config+"/file_dbs/"+
@@ -174,8 +199,6 @@ func (c TBFileDBs) CreateRouteDef(config string, rDef string, file TBFile) error
 	}
 	return nil
 }
-
-//todo update routedef??
 
 /*
 func (c TBFileDBs) GetRadiusDirectories(config string) (*Nap, error) {

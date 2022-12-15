@@ -27,6 +27,26 @@ func main() {
 		log.Fatalf("no password provided")
 	}
 
+	// flags to do different things
+
+	// nap create variables
+	var fNapCreate = flag.Bool("napcreate", false, "create a nap w/ routes")
+	fNapCreateBool := *fNapCreate
+
+	var fNapName = flag.String("customer", "", "customer name used in nap names and routedefs, etc")
+	fNapNameStr := *fNapName
+
+	var fNapProxyHost = flag.String("--napproxyhost", "", "proxy host in ip/host:port format")
+	fNapProxyHostStr := *fNapProxyHost
+
+	var fPhoneNumbers = flag.String("numbers", "", "phone numbers seperated by "+
+		"commands used for various functions (default: empty)")
+	fPhoneNumbersStr := *fPhoneNumbers
+	var fConfigName = flag.String("config", "config_1", "config name to use (default: config_1)")
+	fConfigNameStr := *fConfigName
+
+	// port ranges, interface,sip transport servers,
+
 	flag.Parse()
 
 	// change pointer to non to be able to compare
@@ -51,6 +71,60 @@ func main() {
 	// init the http client constructor thingy 🤪
 	client := sbc.NewClient(cfg)
 
+	if fNapCreateBool {
+
+		nap := sbc.Nap{
+			Name: "pbx_tops1",
+			CallRateLimiting: sbc.NapCallRateLimiting{
+				ProcessingDelayHighThreshold: "6 seconds",
+				ProcessingDelayLowThreshold:  "3 seconds",
+			},
+			Enabled:             true,
+			DefaultProfile:      "default",
+			PortRanges:          []string{"Host.pr_voice_vlan"},
+			SipTransportServers: []string{"voice_net"},
+			SipCfg: sbc.NapSipCfg{
+				PollRemoteProxy: true,
+				SipiParameters: sbc.NapSipiParams{
+					IsupProtocolVariant: "ITU",
+					ContentType:         "itu-t",
+					CallProgressMethod:  "183 Call Progress",
+				},
+				AdvancedParameters: sbc.NapAdvancedParams{
+					MapAnyResponseToAvailableStatus: true,
+					ResponseTimeout:                 "12 seconds",
+					PrivacyType:                     "P-Asserted-Identity",
+					ProxyPollingMaxForwards:         1,
+				},
+				ProxyPortType: "UDP",
+				SipUseProxy:   true,
+				ProxyPort:     5060,
+				FilteringParameters: sbc.NapFilterParams{
+					FilterByLocalPort:    true,
+					FilterByProxyPort:    true,
+					FilterByProxyAddress: true,
+				},
+				ProxyPollingInterval: "1 minute",
+				ProxyAddress:         "10.0.40.12",
+				NetworkAddressTranslation: sbc.NapNatParams{
+					RemoteMethodSip: "None",
+					RemoteMethodRtp: "None",
+				},
+			},
+			CongestionThreshold: sbc.NapCongestionThreshold{
+				PeriodDuration:   "1 minute",
+				NbCallsPerPeriod: 1,
+			},
+		}
+
+		err := client.TBNaps().CreateNap("config_1", nap)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		return
+	}
+
 	/*err := client.Request("GET", "/configurations/config_1?recursive=yes", nil, nil)
 	if err != nil {
 		log.Error(err)
@@ -63,20 +137,20 @@ func main() {
 		log.Error(err)
 	}*/
 
-	var digitMap []*sbc.TBDigitMap
+	//var digitMap []*sbc.TBDigitMap
 
 	// create new item
-	newDigitMapping := &sbc.TBDigitMap{
-		Called:       "2508591501",
+	/*newDigitMapping := &sbc.TBDigitMap{
+		Called:       "2504691649",
 		Calling:      "",
 		RouteSetName: "dec0de",
-	}
+	}*/
 
 	// append item
-	digitMap = append(digitMap, newDigitMapping)
+	/*def = append(def, newDigitMapping)
 
 	// update digit map
-	err := client.TBFileDBs("File_DB").UpdateDigitMap("config_1", "digitmap_new.csv", digitMap)
+	err = client.TBFileDBs("File_DB").UpdateDigitMap("config_1", "digitmap_new.csv", def)
 	if err != nil {
 		log.Error(err)
 	}
@@ -85,29 +159,29 @@ func main() {
 	getAgain, err := client.TBFileDBs("File_DB").GetDigitMap("config_1", "digitmap_new.csv")
 	if err != nil {
 		log.Error(err)
-	}
+	}*/
 
-	marshal1, err := json.Marshal(&digitMap)
+	/*marshal1, err := json.Marshal(&def)
 	if err != nil {
 		log.Error(err)
-	}
-	marshal2, err := json.Marshal(&getAgain)
-	if err != nil {
-		log.Error(err)
-	}
-
-	pretty1, err := prettyJson(marshal1)
+	}*/
+	/*marshal2, err := json.Marshal(&getAgain)
 	if err != nil {
 		log.Error(err)
 	}
 
-	pretty2, err := prettyJson(marshal2)
+	/*pretty1, err := prettyJson(marshal1)
 	if err != nil {
 		log.Error(err)
-	}
+	}*/
 
-	log.Printf("\n" + pretty1)
-	log.Printf("\n" + pretty2)
+	/*pretty2, err := prettyJson(marshal2)
+	if err != nil {
+		log.Error(err)
+	}*/
+
+	/*log.Printf("\n" + pretty1)*/
+	/*log.Printf("\n" + pretty2)*/
 
 	/*names, err := client.TBNaps().GetNap("config_1", "pbx_dec0de")
 	if err != nil {
