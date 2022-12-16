@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"flag"
 	log "github.com/sirupsen/logrus"
+	"strconv"
+	"strings"
 	"tbgo/sbc"
 )
 
@@ -36,14 +38,21 @@ func main() {
 	var fNapName = flag.String("customer", "", "customer name used in nap names and routedefs, etc")
 	fNapNameStr := *fNapName
 
-	var fNapProxyHost = flag.String("--napproxyhost", "", "proxy host in ip/host:port format")
+	var fNapProxyHost = flag.String("napproxyhost", "", "proxy host in ip/host:port format")
 	fNapProxyHostStr := *fNapProxyHost
 
 	var fPhoneNumbers = flag.String("numbers", "", "phone numbers seperated by "+
 		"commands used for various functions (default: empty)")
 	fPhoneNumbersStr := *fPhoneNumbers
+
 	var fConfigName = flag.String("config", "config_1", "config name to use (default: config_1)")
 	fConfigNameStr := *fConfigName
+
+	var fPortRange = flag.String("portrange", "", "port range for rtp??")
+	fPortRangeStr := *fPortRange
+
+	var fSipTransport = flag.String("portrange", "", "port range for rtp??")
+	fSipTransportStr := *fSipTransport
 
 	// port ranges, interface,sip transport servers,
 
@@ -71,18 +80,28 @@ func main() {
 	// init the http client constructor thingy 🤪
 	client := sbc.NewClient(cfg)
 
-	if fNapCreateBool {
+	if fNapCreateBool && fNapNameStr != "" &&
+		fPhoneNumbersStr != "" &&
+		fNapProxyHostStr != "" &&
+		fConfigNameStr != "" &&
+		fPortRangeStr != "" &&
+		fSipTransportStr != "" {
+
+		sipHostInfo := strings.Split(fNapProxyHostStr, ":")
+		sipProxyPort, err := strconv.ParseInt(sipHostInfo[1], 10, 0)
 
 		nap := sbc.Nap{
-			Name: "pbx_tops1",
+			Name: fNapNameStr,
 			CallRateLimiting: sbc.NapCallRateLimiting{
 				ProcessingDelayHighThreshold: "6 seconds",
 				ProcessingDelayLowThreshold:  "3 seconds",
 			},
-			Enabled:             true,
-			DefaultProfile:      "default",
-			PortRanges:          []string{"Host.pr_voice_vlan"},
-			SipTransportServers: []string{"voice_net"},
+			Enabled:        true,
+			DefaultProfile: "default",
+			// Host.pr_voice_vlan
+			// todo make a command seperated list for these instead of a single value
+			PortRanges:          []string{fPortRangeStr},
+			SipTransportServers: []string{fSipTransportStr},
 			SipCfg: sbc.NapSipCfg{
 				PollRemoteProxy: true,
 				SipiParameters: sbc.NapSipiParams{
@@ -98,7 +117,7 @@ func main() {
 				},
 				ProxyPortType: "UDP",
 				SipUseProxy:   true,
-				ProxyPort:     5060,
+				ProxyPort:     int(sipProxyPort),
 				FilteringParameters: sbc.NapFilterParams{
 					FilterByLocalPort:    true,
 					FilterByProxyPort:    true,
@@ -117,10 +136,20 @@ func main() {
 			},
 		}
 
-		err := client.TBNaps().CreateNap("config_1", nap)
+		err = client.TBNaps().CreateNap("config_1", nap)
 		if err != nil {
 			log.Fatal(err)
+			return
 		}
+
+		/*
+			TODO
+			1. Create Routedef
+			2. Modify Digitmap to route numbers to Routedef
+			3. Update the Nap COlumns
+			4. Generate routes
+
+		*/
 
 		return
 	}
