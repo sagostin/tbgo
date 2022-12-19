@@ -61,6 +61,9 @@ func main() {
 	var fDigitMap = flag.String("digitmap", "", "digit map to be modified/updated/etc")
 	fDigitMapFile := *fDigitMap
 
+	var fRouteGroups = flag.String("routegroups", "", "routegroups to be modified/updated/etc")
+	fRouteGroupsCSV := *fRouteGroups
+
 	// port ranges, interface,sip transport servers,
 
 	flag.Parse()
@@ -94,7 +97,7 @@ func main() {
 		fConfigNameStr != "" &&
 		fPortRangeStr != "" &&
 		fSipTransportStr != "" &&
-		fDigitMapFile != "" && fPbx {
+		fDigitMapFile != "" && fPbx && fRouteGroupsCSV != "" {
 
 		// todo create routeset routeDefFile
 		routeDefFile := sbc.TBFile{
@@ -115,13 +118,14 @@ func main() {
 			Priority:     10,
 			Weight:       50,
 			// todo includem routegroups in flags (eg. 55,11,12,32??)
-			RouteGroup: "",
+			RouteGroup: fRouteGroupsCSV,
 		}
 		routeDef = append(routeDef, route)
 
 		// convert the array of routes to a csv
 		marsh, err := gocsv.MarshalString(routeDef)
 		if err != nil {
+			log.Error(err)
 			return
 		}
 
@@ -134,6 +138,7 @@ func main() {
 		// push data to api
 		err = client.TBFileDBs("File_DB").CreateRouteDef(fConfigNameStr, routeDefFile.Name, routeDefFile)
 		if err != nil {
+			log.Error(err)
 			return
 		}
 		//done creating routedef
@@ -224,6 +229,19 @@ func main() {
 		}
 
 		// todo update nap columns
+
+		napColumn := sbc.NapColumnValues{
+			RoutesetsDefinition: routeDefFile.Name,
+			RouteGroups:         fRouteGroupsCSV,
+			RoutesetsDigitmap:   fDigitMapFile,
+			Weight:              "50",
+			//todo flag options to specify these??
+			BlackWhiteList: "default_blacklist.csv",
+			CalledPreRemap: "/^\\+?1?([2-9]\\d{9})$/\\1",
+			Priority:       "10",
+		}
+
+		client.TBNapColumnsValues().UpdateNapColumnValues(fConfigNameStr, napName, napColumn)
 
 		// todo
 
