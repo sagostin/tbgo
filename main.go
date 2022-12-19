@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"flag"
-	"github.com/gocarina/gocsv"
+	_ "github.com/gocarina/gocsv"
 	log "github.com/sirupsen/logrus"
-	"strconv"
-	"strings"
+	_ "strconv"
+	_ "strings"
 	"tbgo/sbc"
 )
 
@@ -33,36 +33,40 @@ func main() {
 	// flags to do different things
 
 	// nap create variables
-	var fNapCreate = flag.Bool("napcreate", false, "create a nap w/ routes")
-	fNapCreateBool := *fNapCreate
+	/*	var fNapCreate = flag.Bool("napcreate", false, "create a nap w/ routes")
+		fNapCreateBool := *fNapCreate
 
-	var flagPbx = flag.Bool("pbx", true, "defines if a nap is a pbx")
-	fPbx := *flagPbx
+		var flagPbx = flag.Bool("pbx", true, "defines if a nap is a pbx")
+		fPbx := *flagPbx
 
-	var fNapName = flag.String("customer", "", "customer name used in nap names and routedefs, etc")
-	fNapNameStr := *fNapName
+		var fNapName = flag.String("customer", "", "customer name used in nap names and routedefs, etc")
+		fNapNameStr := *fNapName
 
-	var fNapProxyHost = flag.String("napproxyhost", "", "proxy host in ip/host:port format")
-	fNapProxyHostStr := *fNapProxyHost
+		var fNapProxyHost = flag.String("napproxyhost", "", "proxy host in ip/host:port format")
+		fNapProxyHostStr := *fNapProxyHost
 
-	var fPhoneNumbers = flag.String("numbers", "", "phone numbers seperated by "+
-		"commands used for various functions (default: empty)")
-	fPhoneNumbersStr := *fPhoneNumbers
+		var fPhoneNumbers = flag.String("numbers", "", "phone numbers seperated by "+
+			"commands used for various functions (default: empty)")
+		fPhoneNumbersStr := *fPhoneNumbers
 
-	var fConfigName = flag.String("config", "config_1", "config name to use (default: config_1)")
-	fConfigNameStr := *fConfigName
+		var fConfigName = flag.String("config", "config_1", "config name to use (default: config_1)")
+		fConfigNameStr := *fConfigName
 
-	var fPortRange = flag.String("portrange", "", "port range for rtp??")
-	fPortRangeStr := *fPortRange
+		var fPortRange = flag.String("portrange", "", "port range for rtp??")
+		fPortRangeStr := *fPortRange
 
-	var fSipTransport = flag.String("portrange", "", "port range for rtp??")
-	fSipTransportStr := *fSipTransport
+		var fSipTransport = flag.String("siptransport", "", "port range for rtp??")
+		fSipTransportStr := *fSipTransport
 
-	var fDigitMap = flag.String("digitmap", "", "digit map to be modified/updated/etc")
-	fDigitMapFile := *fDigitMap
+		var fDigitMap = flag.String("digitmap", "", "digit map to be modified/updated/etc")
+		fDigitMapFile := *fDigitMap
 
-	var fRouteGroups = flag.String("routegroups", "", "routegroups to be modified/updated/etc")
-	fRouteGroupsCSV := *fRouteGroups
+		var fRouteGroups = flag.String("routegroups", "", "routegroups to be modified/updated/etc")
+		fRouteGroupsCSV := *fRouteGroups*/
+
+	// usage: ./tbgo.exe --host https://sbc3.cloud.topsoffice.ca:12358 --username USERNAME --password PASSWORD
+	//				--napcreate --pbx --customer=WadesWindowWashing --napproxyhost=172.23.10.69
+	//				--numbers=2507628888,2507620300 --config=config_1 --portrange= --siptransport=
 
 	// port ranges, interface,sip transport servers,
 
@@ -90,8 +94,14 @@ func main() {
 	// init the http client constructor thingy 🤪
 	client := sbc.NewClient(cfg)
 
+	err := client.Request("GET", "/configurations/system_1/naps/pbx_TopsMVO250/", nil, nil)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+
 	// checks for flags
-	if fNapCreateBool && fNapNameStr != "" &&
+	/*	if fNapCreateBool && fNapNameStr != "" &&
 		fPhoneNumbersStr != "" &&
 		fNapProxyHostStr != "" &&
 		fConfigNameStr != "" &&
@@ -252,10 +262,10 @@ func main() {
 			3. Update the Nap COlumns
 			4. Generate routes
 
-		*/
+	*/
 
-		return
-	}
+	//	return
+	//}*/
 }
 
 func prettyJson(data []byte) (string, error) {
