@@ -56,7 +56,7 @@ func main() {
 
 	var fNAPProfile = flag.String("napprofile", "default", "nap profile to use when creating naps, default is default")
 
-	// usage: ./tbgo.exe --host https://sbc3.cloud.topsoffice.ca:12358 --username USERNAME --password PASSWORD --napcreate --pbx
+	// usage: ./tbgo.exe --host https://host:port --username USERNAME --password PASSWORD --napcreate --pbx
 	//--customer=WadesWindowWashing --napproxyhost=172.23.10.69:5060 --numbers=2507628888,2507620300 --config=config_1
 	//--portrange=Host.pr_WAN0 --siptransport=WAN0_5060 --digitmap=digitmap.csv --routegroups=55,11
 
