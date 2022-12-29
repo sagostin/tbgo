@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"flag"
-	_ "github.com/gocarina/gocsv"
+	"github.com/gocarina/gocsv"
 	log "github.com/sirupsen/logrus"
-	_ "strconv"
-	_ "strings"
+	"strconv"
+	"strings"
 	"tbgo/sbc"
 )
 
@@ -33,44 +33,47 @@ func main() {
 	// flags to do different things
 
 	// nap create variables
-	/*	var fNapCreate = flag.Bool("napcreate", false, "create a nap w/ routes")
-		fNapCreateBool := *fNapCreate
+	var fNapCreate = flag.Bool("napcreate", false, "create a nap w/ routes")
 
-		var flagPbx = flag.Bool("pbx", true, "defines if a nap is a pbx")
-		fPbx := *flagPbx
+	var flagPbx = flag.Bool("pbx", true, "defines if a nap is a pbx")
 
-		var fNapName = flag.String("customer", "", "customer name used in nap names and routedefs, etc")
-		fNapNameStr := *fNapName
+	var fNapName = flag.String("customer", "", "customer name used in nap names and routedefs, etc")
 
-		var fNapProxyHost = flag.String("napproxyhost", "", "proxy host in ip/host:port format")
-		fNapProxyHostStr := *fNapProxyHost
+	var fNapProxyHost = flag.String("napproxyhost", "", "proxy host in ip/host:port format")
 
-		var fPhoneNumbers = flag.String("numbers", "", "phone numbers seperated by "+
-			"commands used for various functions (default: empty)")
-		fPhoneNumbersStr := *fPhoneNumbers
+	var fPhoneNumbers = flag.String("numbers", "", "phone numbers seperated by "+
+		"commands used for various functions (default: empty)")
 
-		var fConfigName = flag.String("config", "config_1", "config name to use (default: config_1)")
-		fConfigNameStr := *fConfigName
+	var fConfigName = flag.String("config", "config_1", "config name to use (default: config_1)")
 
-		var fPortRange = flag.String("portrange", "", "port range for rtp??")
-		fPortRangeStr := *fPortRange
+	var fPortRange = flag.String("portrange", "", "port range for rtp??")
 
-		var fSipTransport = flag.String("siptransport", "", "port range for rtp??")
-		fSipTransportStr := *fSipTransport
+	var fSipTransport = flag.String("siptransport", "", "port range for rtp??")
 
-		var fDigitMap = flag.String("digitmap", "", "digit map to be modified/updated/etc")
-		fDigitMapFile := *fDigitMap
+	var fDigitMap = flag.String("digitmap", "", "digit map to be modified/updated/etc")
 
-		var fRouteGroups = flag.String("routegroups", "", "routegroups to be modified/updated/etc")
-		fRouteGroupsCSV := *fRouteGroups*/
+	var fRouteGroups = flag.String("routegroups", "", "routegroups to be modified/updated/etc")
 
-	// usage: ./tbgo.exe --host https://sbc3.cloud.topsoffice.ca:12358 --username USERNAME --password PASSWORD
-	//				--napcreate --pbx --customer=WadesWindowWashing --napproxyhost=172.23.10.69
-	//				--numbers=2507628888,2507620300 --config=config_1 --portrange= --siptransport=
+	var fNAPProfile = flag.String("napprofile", "default", "nap profile to use when creating naps, default is default")
+
+	// usage: ./tbgo.exe --host https://sbc3.cloud.topsoffice.ca:12358 --username USERNAME --password PASSWORD --napcreate --pbx
+	//--customer=WadesWindowWashing --napproxyhost=172.23.10.69:5060 --numbers=2507628888,2507620300 --config=config_1
+	//--portrange=Host.pr_WAN0 --siptransport=WAN0_5060 --digitmap=digitmap.csv --routegroups=55,11
 
 	// port ranges, interface,sip transport servers,
-
 	flag.Parse()
+
+	fNapCreateBool := *fNapCreate
+	fPbx := *flagPbx
+	fRouteGroupsCSV := *fRouteGroups
+	fSipTransportStr := *fSipTransport
+	fPortRangeStr := *fPortRange
+	fDigitMapFile := *fDigitMap
+	fConfigNameStr := *fConfigName
+	fPhoneNumbersStr := *fPhoneNumbers
+	fNapProxyHostStr := *fNapProxyHost
+	fNapNameStr := *fNapName
+	napProfile := *fNAPProfile
 
 	// change pointer to non to be able to compare
 	apiUsername := *fUsername
@@ -93,21 +96,60 @@ func main() {
 
 	// init the http client constructor thingy 🤪
 	client := sbc.NewClient(cfg)
-
-	err := client.Request("GET", "/configurations/system_1/naps/pbx_TopsMVO250/", nil, nil)
-	if err != nil {
-		log.Error(err)
-		return
-	}
+	/*
+		err := client.Request("GET", "/configurations/system_1/naps/pbx_TopsMVO250/", nil, nil)
+		if err != nil {
+			log.Error(err)
+			return
+		}*/
 
 	// checks for flags
-	/*	if fNapCreateBool && fNapNameStr != "" &&
+	if fNapCreateBool && fNapNameStr != "" &&
 		fPhoneNumbersStr != "" &&
 		fNapProxyHostStr != "" &&
 		fConfigNameStr != "" &&
 		fPortRangeStr != "" &&
 		fSipTransportStr != "" &&
 		fDigitMapFile != "" && fPbx && fRouteGroupsCSV != "" {
+
+		// File_DB is default?
+		// get digitmap
+		// todo have option to provide digitmap routeDefFile name
+		digitMap, err := client.TBFileDBs("File_DB").GetDigitMap(fConfigNameStr, fDigitMapFile)
+		if err != nil {
+			log.Error(err)
+			return
+		}
+
+		// split numbers fdrom flag and append to digitmap
+		phoneNumbers := strings.Split(fPhoneNumbersStr, ",")
+
+		var duplicateNumber = false
+		for _, i := range digitMap {
+			for _, i2 := range phoneNumbers {
+				if strings.Contains(i.Called, i2) {
+					duplicateNumber = true
+					log.Error("DigitMap already contains ", i2)
+				}
+			}
+		}
+
+		if duplicateNumber {
+			log.Fatalf("Duplicate numbers are being requested to be added to DigitMap")
+		}
+
+		for _, i := range phoneNumbers {
+			// create new item
+			newDigitMapping := &sbc.TBDigitMap{
+				Called:  i,
+				Calling: "",
+				//todo friendlyify name to match scheme
+				RouteSetName: fNapNameStr,
+			}
+
+			// append item
+			digitMap = append(digitMap, newDigitMapping)
+		}
 
 		// todo create routeset routeDefFile
 		routeDefFile := sbc.TBFile{
@@ -146,40 +188,19 @@ func main() {
 		routeDefFile.Content = formatted
 
 		// push data to api
-		err = client.TBFileDBs("File_DB").CreateRouteDef(fConfigNameStr, routeDefFile.Name, routeDefFile)
+		//todo make it remove files and such if the creation failed
+		err = client.TBFileDBs("File_DB").CreateRouteDef(fConfigNameStr, routeDefFile)
 		if err != nil {
 			log.Error(err)
 			return
 		}
 		//done creating routedef
 
-		// File_DB is default?
-		// get digitmap
-		// todo have option to provide digitmap routeDefFile name
-		digitMap, err := client.TBFileDBs("File_DB").GetDigitMap(fConfigNameStr, "digitmap_new.csv")
-		if err != nil {
-			log.Error(err)
-		}
-
-		// split numbers fdrom flag and append to digitmap
-		phoneNumbers := strings.Split(fPhoneNumbersStr, ",")
-		for _, i := range phoneNumbers {
-			// create new item
-			newDigitMapping := &sbc.TBDigitMap{
-				Called:  i,
-				Calling: "",
-				//todo friendlyify name to match scheme
-				RouteSetName: fNapNameStr,
-			}
-
-			// append item
-			digitMap = append(digitMap, newDigitMapping)
-		}
-
 		// update digit map
-		err = client.TBFileDBs("File_DB").UpdateDigitMap("config_1", "digitmap_new.csv", digitMap)
+		err = client.TBFileDBs("File_DB").UpdateDigitMap(fConfigNameStr, fDigitMapFile, digitMap)
 		if err != nil {
 			log.Error(err)
+			return
 		}
 
 		// create nap
@@ -193,11 +214,11 @@ func main() {
 				ProcessingDelayLowThreshold:  "3 seconds",
 			},
 			Enabled:        true,
-			DefaultProfile: "default",
+			DefaultProfile: napProfile,
 			// Host.pr_voice_vlan
 			// todo make a command seperated list for these instead of a single value
-			PortRanges:          []string{fPortRangeStr},
-			SipTransportServers: []string{fSipTransportStr},
+			SipTransportServers: []string{fSipTransportStr}, // WAN0_5060
+			PortRanges:          []string{fPortRangeStr},    // Host.pr_WAN0
 			SipCfg: sbc.NapSipCfg{
 				PollRemoteProxy: true,
 				SipiParameters: sbc.NapSipiParams{
@@ -232,7 +253,7 @@ func main() {
 			},
 		}
 
-		err = client.TBNaps().CreateNap("config_1", nap)
+		err = client.TBNaps().CreateNap(fConfigNameStr, nap)
 		if err != nil {
 			log.Fatal(err)
 			return
@@ -251,21 +272,14 @@ func main() {
 			Priority:       "10",
 		}
 
-		client.TBNapColumnsValues().UpdateNapColumnValues(fConfigNameStr, napName, napColumn)
+		err = client.TBNapColumnsValues().UpdateNapColumnValues(fConfigNameStr, napName, napColumn)
+		if err != nil {
+			log.Error(err)
+			return
+		}
 
-		// todo
-
-		/*
-			TODO
-			1. Create Routedef
-			2. Modify Digitmap to route numbers to Routedef
-			3. Update the Nap COlumns
-			4. Generate routes
-
-	*/
-
-	//	return
-	//}*/
+		log.Info("Successfully created NAP: " + nap.Name)
+	}
 }
 
 func prettyJson(data []byte) (string, error) {

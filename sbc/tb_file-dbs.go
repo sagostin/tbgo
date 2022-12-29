@@ -189,10 +189,10 @@ func (c TBFileDBs) UpdateRouteDef(config string, routeDefFile string, routeDef [
 	return nil
 }
 
-func (c TBFileDBs) CreateRouteDef(config string, rDef string, file TBFile) error {
+func (c TBFileDBs) CreateRouteDef(config string, file TBFile) error {
 	// File_DB is default?
 	err := c.Client.Request("POST", "/configurations/"+config+"/file_dbs/"+
-		c.fileDbPath+"/routesets_definitions/"+strings.ReplaceAll(rDef, ".", "%2E"),
+		c.fileDbPath+"/routesets_definitions/",
 		file, nil)
 	if err != nil {
 		return err
