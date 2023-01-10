@@ -20,7 +20,7 @@ Requirements: Go 1.19
 3. Usage:
 
    ```
-   tbgo.exe --host https://host:port --username USERNAME --password PASSWORD --napcreate --pbx --customer=WadesWindowWashing --napproxyhost=192.168.0.1:5060 --numbers=5555555555,5555555522 --config=config_1 --portrange=Host.pr_LAN0 --siptransport=LAN0_5060 --digitmap=digitmap.csv --naproutegroups=55,11,12,32 --rdefroutegroups=55 --napprofile=Zultys
+   tbgo.exe --host https://host:port --username USERNAME --password PASSWORD --napcreate --pbx --customer=WadesWindowWashing --napproxyhost=192.168.0.1:5060 --numbers=5555555555,5555555522 --config=config_1 --portrange=Host.pr_LAN0 --siptransport=LAN0_5060 --digitmap=digitmap.csv --napcroutegroups=55,11,12,32 --rdefroutegroups=55 --napprofile=Zultys
    ```
 
 ## Arguments / Flags
@@ -38,7 +38,7 @@ Requirements: Go 1.19
 * `--siptransport WAN0_5060` *name of the sip transport to be used*
 * `--digitmap digitmap.csv` *digitmap to be used*
 * `--rdefroutegroups 55,10,1` *route groups to be used in routedef creation*
-* `--naproutegroups 55,10,1` *route groups to be used in nap colum creation*
+* `--napcroutegroups 55,10,1` *route groups to be used in nap colum creation*
 * `--napprofile default` *specify the nap profile*
 
 ## Licence
