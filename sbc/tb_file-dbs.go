@@ -100,7 +100,7 @@ func (c TBFileDBs) GetDigitMapsNames(config string) ([]string, error) {
 	return k, nil
 }
 
-func (c TBFileDBs) GetDigitMap(config string, dMap string) ([]*TBDigitMap, error) {
+func (c TBFileDBs) GetDigitMap(config string, dMap string) ([]TBDigitMap, error) {
 	var file *TBFile
 	err := c.Client.Request("GET", "/configurations/"+config+"/file_dbs/"+
 		c.fileDbPath+"/routesets_digitmaps/"+strings.ReplaceAll(dMap, ".", "%2E"),
@@ -109,7 +109,7 @@ func (c TBFileDBs) GetDigitMap(config string, dMap string) ([]*TBDigitMap, error
 		return nil, err
 	}
 
-	var digitM []*TBDigitMap
+	var digitM []TBDigitMap
 	reader := *strings.NewReader(file.Content)
 	err = gocsv.Unmarshal(&reader, &digitM)
 	if err != nil {
@@ -119,7 +119,7 @@ func (c TBFileDBs) GetDigitMap(config string, dMap string) ([]*TBDigitMap, error
 	return digitM, nil
 }
 
-func (c TBFileDBs) UpdateDigitMap(config string, digitMapFile string, digitMap []*TBDigitMap) error {
+func (c TBFileDBs) UpdateDigitMap(config string, digitMapFile string, digitMap []TBDigitMap) error {
 	file := TBFile{
 		Name: digitMapFile,
 	}
@@ -144,7 +144,7 @@ func (c TBFileDBs) UpdateDigitMap(config string, digitMapFile string, digitMap [
 	return nil
 }
 
-func (c TBFileDBs) GetRouteDef(config string, rDef string) ([]*TBRouteDef, error) {
+func (c TBFileDBs) GetRouteDef(config string, rDef string) ([]TBRouteDef, error) {
 	var file *TBFile
 	// File_DB is default?
 	err := c.Client.Request("GET", "/configurations/"+config+"/file_dbs/"+
@@ -154,7 +154,7 @@ func (c TBFileDBs) GetRouteDef(config string, rDef string) ([]*TBRouteDef, error
 		return nil, err
 	}
 
-	var routeD []*TBRouteDef
+	var routeD []TBRouteDef
 	reader := *strings.NewReader(file.Content)
 	err = gocsv.Unmarshal(&reader, &routeD)
 	if err != nil {
@@ -164,7 +164,18 @@ func (c TBFileDBs) GetRouteDef(config string, rDef string) ([]*TBRouteDef, error
 	return routeD, nil
 }
 
-func (c TBFileDBs) UpdateRouteDef(config string, routeDefFile string, routeDef []*TBRouteDef) error {
+func (c TBFileDBs) DeleteRouteDef(config string, rDef string) error {
+	// File_DB is default?
+	err := c.Client.Request("DELETE", "/configurations/"+config+"/file_dbs/"+
+		c.fileDbPath+"/routesets_definitions/"+strings.ReplaceAll(rDef, ".", "%2E"),
+		nil, nil)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (c TBFileDBs) UpdateRouteDef(config string, routeDefFile string, routeDef []TBRouteDef) error {
 	file := TBFile{
 		Name: routeDefFile,
 	}

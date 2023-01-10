@@ -53,7 +53,7 @@ func main() {
 	var fDigitMap = flag.String("digitmap", "", "digit map to be modified/updated/etc")
 
 	var fRdefRouteGroups = flag.String("rdefroutegroups", "", "routegroups to be modified/updated/etc in rdef")
-	var fNapcRouteGroups = flag.String("napcroutegroups", "", "routegroups to be modified/updated/etc in rdef")
+	var fNapcRouteGroups = flag.String("napcroutegroups", "", "routegroups to be modified/updated/etc in napc")
 
 	var fNAPProfile = flag.String("napprofile", "default", "nap profile to use when creating naps, default is default")
 
@@ -123,8 +123,23 @@ func main() {
 			return
 		}
 
+		// copy to digitmaporig incase something fails
+		var digitMapOrig []sbc.TBDigitMap
+		copy(digitMapOrig, digitMap)
+
 		// split numbers fdrom flag and append to digitmap
 		phoneNumbers := strings.Split(fPhoneNumbersStr, ",")
+
+		for pN1, _ := range phoneNumbers {
+			for pN2, _ := range phoneNumbers {
+				if pN1 != pN2 {
+					if phoneNumbers[pN1] == phoneNumbers[pN2] {
+						log.Error("Duplicate numbers trying to be sent.")
+						return
+					}
+				}
+			}
+		}
 
 		var duplicateNumber = false
 		for _, i := range digitMap {
@@ -142,7 +157,7 @@ func main() {
 
 		for _, i := range phoneNumbers {
 			// create new item
-			newDigitMapping := &sbc.TBDigitMap{
+			newDigitMapping := sbc.TBDigitMap{
 				Called:  i,
 				Calling: "",
 				//todo friendlyify name to match scheme
@@ -257,7 +272,23 @@ func main() {
 
 		err = client.TBNaps().CreateNap(fConfigNameStr, nap)
 		if err != nil {
-			log.Fatal(err)
+			// update digit map
+			log.Warn("NAP creation failed. Reverting digit map.")
+			err = client.TBFileDBs("File_DB").UpdateDigitMap(fConfigNameStr, fDigitMapFile, digitMapOrig)
+			if err != nil {
+				log.Error(err)
+				return
+			}
+
+			log.Warn("NAP creation failed. Reverting route def. Deleting file...")
+			err = client.TBFileDBs("File_DB").DeleteRouteDef(fConfigNameStr, routeDefFile.Name)
+			if err != nil {
+				log.Error(err)
+				return
+			}
+
+			// todo remove created digitmap & routedef if nap creation fails
+			log.Error(err)
 			return
 		}
 
