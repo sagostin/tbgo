@@ -52,7 +52,8 @@ func main() {
 
 	var fDigitMap = flag.String("digitmap", "", "digit map to be modified/updated/etc")
 
-	var fRouteGroups = flag.String("routegroups", "", "routegroups to be modified/updated/etc")
+	var fRdefRouteGroups = flag.String("rdefroutegroups", "", "routegroups to be modified/updated/etc in rdef")
+	var fNapcRouteGroups = flag.String("napcroutegroups", "", "routegroups to be modified/updated/etc in rdef")
 
 	var fNAPProfile = flag.String("napprofile", "default", "nap profile to use when creating naps, default is default")
 
@@ -65,7 +66,8 @@ func main() {
 
 	fNapCreateBool := *fNapCreate
 	fPbx := *flagPbx
-	fRouteGroupsCSV := *fRouteGroups
+	fRdefRouteGroupsCSV := *fRdefRouteGroups
+	fNapcRouteGroupsCSV := *fNapcRouteGroups
 	fSipTransportStr := *fSipTransport
 	fPortRangeStr := *fPortRange
 	fDigitMapFile := *fDigitMap
@@ -110,7 +112,7 @@ func main() {
 		fConfigNameStr != "" &&
 		fPortRangeStr != "" &&
 		fSipTransportStr != "" &&
-		fDigitMapFile != "" && fPbx && fRouteGroupsCSV != "" {
+		fDigitMapFile != "" && fPbx && fRdefRouteGroupsCSV != "" && fNapcRouteGroupsCSV != "" {
 
 		// File_DB is default?
 		// get digitmap
@@ -170,7 +172,7 @@ func main() {
 			Priority:     10,
 			Weight:       50,
 			// todo includem routegroups in flags (eg. 55,11,12,32??)
-			RouteGroup: fRouteGroupsCSV,
+			RouteGroup: fRdefRouteGroupsCSV,
 		}
 		routeDef = append(routeDef, route)
 
@@ -263,12 +265,12 @@ func main() {
 
 		napColumn := sbc.NapColumnValues{
 			RoutesetsDefinition: routeDefFile.Name,
-			RouteGroups:         fRouteGroupsCSV,
+			RouteGroups:         fNapcRouteGroupsCSV,
 			RoutesetsDigitmap:   fDigitMapFile,
 			Weight:              "50",
 			//todo flag options to specify these??
 			BlackWhiteList: "default_blacklist.csv",
-			CalledPreRemap: "/^\\+?1?([2-9]\\d{9})$/\\1",
+			CalledPreRemap: "/^\\+?1?([2-9]\\d{9})$/\\1", // /^\+?1?([2-9]\d{9})$/\1
 			Priority:       "10",
 		}
 
