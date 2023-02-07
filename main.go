@@ -33,29 +33,26 @@ func main() {
 	// flags to do different things
 
 	// nap create variables
-	var fNapCreate = flag.Bool("napcreate", false, "create a nap w/ routes")
-
+	var fNapCreate = flag.Bool("create", false, "specify to use the creation flag")
+	var flagUpdate = flag.Bool("update", false, "specify to use the update flag")
+	var flagNap = flag.Bool("nap", true, "defines what type of change to make, eg. nap, digitmap, etc")
 	var flagPbx = flag.Bool("pbx", true, "defines if a nap is a pbx")
 
 	var fNapName = flag.String("customer", "", "customer name used in nap names and routedefs, etc")
 
-	var fNapProxyHost = flag.String("napproxyhost", "", "proxy host in ip/host:port format")
-
-	var fPhoneNumbers = flag.String("numbers", "", "phone numbers seperated by "+
-		"commands used for various functions (default: empty)")
-
 	var fConfigName = flag.String("config", "config_1", "config name to use (default: config_1)")
-
-	var fPortRange = flag.String("portrange", "", "port range for rtp??")
-
-	var fSipTransport = flag.String("siptransport", "", "port range for rtp??")
-
 	var fDigitMap = flag.String("digitmap", "", "digit map to be modified/updated/etc")
 
+	var fNapProxyHost = flag.String("napproxyhost", "", "proxy host in ip/host:port format")
+	var fPhoneNumbers = flag.String("numbers", "", "phone numbers seperated by "+
+		"commands used for various functions (default: empty)")
+	var fPortRange = flag.String("portrange", "", "port range for rtp??")
+	var fSipTransport = flag.String("siptransport", "", "port range for rtp??")
 	var fRdefRouteGroups = flag.String("rdefroutegroups", "", "routegroups to be modified/updated/etc in rdef")
 	var fNapcRouteGroups = flag.String("napcroutegroups", "", "routegroups to be modified/updated/etc in napc")
-
 	var fNAPProfile = flag.String("napprofile", "default", "nap profile to use when creating naps, default is default")
+
+	var fMaxTotalCalls = flag.Int("maxtotalcalls", 2, "maximum total of calls allowed on nap (default is 2)")
 
 	// usage: ./tbgo.exe --host https://host:port --username USERNAME --password PASSWORD --napcreate --pbx
 	//--customer=WadesWindowWashing --napproxyhost=172.23.10.69:5060 --numbers=2507628888,2507620300 --config=config_1
@@ -65,17 +62,21 @@ func main() {
 	flag.Parse()
 
 	fNapCreateBool := *fNapCreate
+	fNap := *flagNap
+	fUpdate := *flagUpdate
 	fPbx := *flagPbx
+	fConfigNameStr := *fConfigName
+	fDigitMapFile := *fDigitMap
+
 	fRdefRouteGroupsCSV := *fRdefRouteGroups
 	fNapcRouteGroupsCSV := *fNapcRouteGroups
 	fSipTransportStr := *fSipTransport
 	fPortRangeStr := *fPortRange
-	fDigitMapFile := *fDigitMap
-	fConfigNameStr := *fConfigName
 	fPhoneNumbersStr := *fPhoneNumbers
 	fNapProxyHostStr := *fNapProxyHost
 	fNapNameStr := *fNapName
 	napProfile := *fNAPProfile
+	napTotalCalls := *fMaxTotalCalls
 
 	// change pointer to non to be able to compare
 	apiUsername := *fUsername
@@ -105,8 +106,18 @@ func main() {
 			return
 		}*/
 
+	if fUpdate {
+		// if the update flag is set, proceed to check if they are wanting to update a nap, pbx, etc
+		if fNap {
+
+		}
+
+	}
+
 	// checks for flags
-	if fNapCreateBool && fNapNameStr != "" &&
+	if fNapCreateBool && fPbx &&
+		fNap &&
+		fNapNameStr != "" &&
 		fPhoneNumbersStr != "" &&
 		fNapProxyHostStr != "" &&
 		fConfigNameStr != "" &&
@@ -227,8 +238,9 @@ func main() {
 		nap := sbc.Nap{
 			Name: napName,
 			CallRateLimiting: sbc.NapCallRateLimiting{
-				ProcessingDelayHighThreshold: "6 seconds",
-				ProcessingDelayLowThreshold:  "3 seconds",
+				ProcessingDelayHighThreshold:  "6 seconds",
+				ProcessingDelayLowThreshold:   "3 seconds",
+				MaximumSimultaneousTotalCalls: napTotalCalls,
 			},
 			Enabled:        true,
 			DefaultProfile: napProfile,
