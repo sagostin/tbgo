@@ -43,7 +43,7 @@ func main() {
 	var fConfigName = flag.String("config", "config_1", "config name to use (default: config_1)")
 	var fDigitMap = flag.String("digitmap", "", "digit map to be modified/updated/etc")
 
-	var fNapProxyHost = flag.String("napproxyhost", "", "proxy host in ip/host:port format")
+	var fNapProxyHost = flag.String("proxyhost", "", "proxy host in ip/host:port format")
 	var fPhoneNumbers = flag.String("numbers", "", "phone numbers seperated by "+
 		"commands used for various functions (default: empty)")
 	var fPortRange = flag.String("portrange", "", "port range for rtp??")
@@ -52,11 +52,7 @@ func main() {
 	var fNapcRouteGroups = flag.String("napcroutegroups", "", "routegroups to be modified/updated/etc in napc")
 	var fNAPProfile = flag.String("napprofile", "default", "nap profile to use when creating naps, default is default")
 
-	var fMaxTotalCalls = flag.Int("maxtotalcalls", 2, "maximum total of calls allowed on nap (default is 2)")
-
-	// usage: ./tbgo.exe --host https://host:port --username USERNAME --password PASSWORD --napcreate --pbx
-	//--customer=WadesWindowWashing --napproxyhost=172.23.10.69:5060 --numbers=2507628888,2507620300 --config=config_1
-	//--portrange=Host.pr_WAN0 --siptransport=WAN0_5060 --digitmap=digitmap.csv --routegroups=55,11
+	var fMaxTotalCalls = flag.Int("maxtotalcalls", 6, "maximum total of calls allowed on nap (default is 2)")
 
 	// port ranges, interface,sip transport servers,
 	flag.Parse()
@@ -99,19 +95,32 @@ func main() {
 
 	// init the http client constructor thingy 🤪
 	client := sbc.NewClient(cfg)
-	/*
-		err := client.Request("GET", "/configurations/system_1/naps/pbx_TopsMVO250/", nil, nil)
-		if err != nil {
-			log.Error(err)
-			return
-		}*/
+
+	napName := fNapNameStr
+	if fPbx {
+		napName = "pbx_" + napName
+	}
 
 	if fUpdate {
 		// if the update flag is set, proceed to check if they are wanting to update a nap, pbx, etc
-		if fNap {
+		if fNap && fNapNameStr != "" {
+			// todo update max call limit
+			nap, err := client.TBNaps().GetNap(fConfigNameStr, napName)
+			if err != nil {
+				log.Error(err)
+				return
+			}
 
+			nap.CallRateLimiting.MaximumSimultaneousTotalCalls = napTotalCalls
+
+			newNap := *nap
+
+			err = client.TBNaps().UpdateNap(fConfigNameStr, newNap)
+			if err != nil {
+				log.Error(err)
+				return
+			}
 		}
-
 	}
 
 	// checks for flags
@@ -185,11 +194,6 @@ func main() {
 		}
 
 		// makes the napname start nwith pbx
-
-		napName := fNapNameStr
-		if fPbx {
-			napName = "pbx_" + napName
-		}
 
 		// define a new route for the routedef routeDefFile
 		var routeDef []*sbc.TBRouteDef

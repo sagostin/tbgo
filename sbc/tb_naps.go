@@ -60,3 +60,11 @@ func (c TBNaps) CreateNap(config string, nap Nap) error {
 	}
 	return nil
 }
+
+func (c TBNaps) UpdateNap(config string, nap Nap) error {
+	err := c.Client.Request("PUT", "/configurations/"+config+"/naps/"+nap.Name, nap, nil)
+	if err != nil {
+		return err
+	}
+	return nil
+}
