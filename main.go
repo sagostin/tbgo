@@ -6,6 +6,7 @@ import (
 	"flag"
 	"github.com/gocarina/gocsv"
 	log "github.com/sirupsen/logrus"
+	"regexp"
 	"strconv"
 	"strings"
 	"tbgo/sbc"
@@ -120,6 +121,7 @@ func main() {
 				log.Error(err)
 				return
 			}
+			return
 		}
 	}
 
@@ -182,6 +184,11 @@ func main() {
 				Calling: "",
 				//todo friendlyify name to match scheme
 				RouteSetName: fNapNameStr,
+			}
+
+			match, _ := regexp.MatchString("^(\\+\\d{1,2}\\s)?\\(?\\d{3}\\)?[\\s.-]?\\d{3}[\\s.-]?\\d{4}$", i)
+			if !match {
+				log.Fatalf("Something went wrong trying to validate the numbers. please check your numbers and try again.")
 			}
 
 			// append item
