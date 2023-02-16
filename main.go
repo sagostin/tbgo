@@ -36,6 +36,7 @@ func main() {
 	// nap create variables
 	var fNapCreate = flag.Bool("create", false, "specify to use the creation flag")
 	var flagUpdate = flag.Bool("update", false, "specify to use the update flag")
+	var flagDelete = flag.Bool("delete", false, "specify to use the delete flag")
 	var flagNap = flag.Bool("nap", true, "defines what type of change to make, eg. nap, digitmap, etc")
 	var flagPbx = flag.Bool("pbx", true, "defines if a nap is a pbx")
 
@@ -52,8 +53,15 @@ func main() {
 	var fRdefRouteGroups = flag.String("rdefroutegroups", "", "routegroups to be modified/updated/etc in rdef")
 	var fNapcRouteGroups = flag.String("napcroutegroups", "", "routegroups to be modified/updated/etc in napc")
 	var fNAPProfile = flag.String("napprofile", "default", "nap profile to use when creating naps, default is default")
+	var fNAPProxyPoll = flag.Bool("napproxypoll", true, "enable nap proxy polling")
+	var fNAPProxyPollEnable = flag.Bool("napproxypollenable", true, "enable nap proxy polling")
 
-	var fMaxTotalCalls = flag.Int("maxtotalcalls", 6, "maximum total of calls allowed on nap (default is 2)")
+	var fRemoteMethodSIP = flag.String("remote_method_sip", "None", "nat remote sip method")
+	var fRemoteMethodRTP = flag.String("remote_method_rtp", "None", "nat remote rtp method")
+	var fLocalMethodSIP = flag.String("local_method_sip", "", "nat local sip method")
+	var fLocalMethodRTP = flag.String("local_method_rtp", "", "nat local rtp method")
+
+	var fMaxTotalCalls = flag.Int("maxtotalcalls", 6, "maximum total of calls allowed on nap (default is 6)")
 
 	// port ranges, interface,sip transport servers,
 	flag.Parse()
@@ -61,6 +69,7 @@ func main() {
 	fNapCreateBool := *fNapCreate
 	fNap := *flagNap
 	fUpdate := *flagUpdate
+	fDelete := *flagDelete
 	fPbx := *flagPbx
 	fConfigNameStr := *fConfigName
 	fDigitMapFile := *fDigitMap
@@ -74,6 +83,16 @@ func main() {
 	fNapNameStr := *fNapName
 	napProfile := *fNAPProfile
 	napTotalCalls := *fMaxTotalCalls
+	napProxyPollEnable := *fNAPProxyPollEnable
+	napProxyPoll := *fNAPProxyPoll
+
+	// nap NAT
+	natRemoteSIP := *fRemoteMethodSIP
+	natRemoteRTP := *fRemoteMethodRTP
+	natLocalSIP := *fLocalMethodSIP
+	natLocalRTP := *fLocalMethodRTP
+
+	phoneNumbers := strings.Split(fPhoneNumbersStr, ",")
 
 	// change pointer to non to be able to compare
 	apiUsername := *fUsername
@@ -102,7 +121,31 @@ func main() {
 		napName = "pbx_" + napName
 	}
 
-	if fUpdate {
+	// delete
+	if fDelete {
+		// delete single numbers or batch
+		// delete full naps (remove numbers, remove routedefs, etc.)
+
+		if len(phoneNumbers) > 0 && fDigitMapFile != "" {
+			_, err := client.TBFileDBs("File_DB").GetDigitMap(fConfigNameStr, fDigitMapFile)
+			if err != nil {
+				return
+			}
+
+			// todo
+			// get current list of numbers, and sort through them, removing the ones that had been previously provided
+			// and specified to be removed. remove the numbers from the array and send the updated version of digit map to it
+
+			// todo
+			// nap deletion, digitmaps need to be cleaned up, etc to be able to remove naps fully.
+
+			// todo
+			//
+		}
+	}
+
+	// update max total calls
+	if fUpdate && fConfigNameStr != "" {
 		// if the update flag is set, proceed to check if they are wanting to update a nap, pbx, etc
 		if fNap && fNapNameStr != "" {
 			// todo update max call limit
@@ -113,15 +156,45 @@ func main() {
 			}
 
 			nap.CallRateLimiting.MaximumSimultaneousTotalCalls = napTotalCalls
-
 			newNap := *nap
-
 			err = client.TBNaps().UpdateNap(fConfigNameStr, newNap)
 			if err != nil {
 				log.Error(err)
 				return
 			}
 			return
+		}
+
+		// update proxy pollin (disable)
+		if napProxyPoll {
+			getNaps, err := client.TBNaps().GetNames(fConfigNameStr)
+
+			if err != nil {
+				log.Error(err)
+				return
+			}
+
+			for _, nap := range getNaps {
+				if !strings.Contains(nap, "pbx_") {
+					log.Error("nap does not start with pbx_")
+					continue
+				}
+
+				getNap, err := client.TBNaps().GetNap(fConfigNameStr, nap)
+				if err != nil {
+					log.Error(err)
+					return
+				}
+
+				getNap.SipCfg.PollRemoteProxy = false
+				newNap := *getNap
+
+				err = client.TBNaps().UpdateNap(fConfigNameStr, newNap)
+				if err != nil {
+					log.Error(err)
+					return
+				}
+			}
 		}
 	}
 
@@ -150,7 +223,6 @@ func main() {
 		copy(digitMapOrig, digitMap)
 
 		// split numbers fdrom flag and append to digitmap
-		phoneNumbers := strings.Split(fPhoneNumbersStr, ",")
 
 		for pN1, _ := range phoneNumbers {
 			for pN2, _ := range phoneNumbers {
@@ -260,7 +332,7 @@ func main() {
 			SipTransportServers: []string{fSipTransportStr}, // WAN0_5060
 			PortRanges:          []string{fPortRangeStr},    // Host.pr_WAN0
 			SipCfg: sbc.NapSipCfg{
-				PollRemoteProxy: true,
+				PollRemoteProxy: napProxyPollEnable,
 				SipiParameters: sbc.NapSipiParams{
 					IsupProtocolVariant: "ITU",
 					ContentType:         "itu-t",
@@ -283,8 +355,10 @@ func main() {
 				ProxyPollingInterval: "1 minute",
 				ProxyAddress:         sipHostInfo[0],
 				NetworkAddressTranslation: sbc.NapNatParams{
-					RemoteMethodSip: "None",
-					RemoteMethodRtp: "None",
+					RemoteMethodSip: natRemoteSIP,
+					RemoteMethodRtp: natRemoteRTP,
+					LocalMethodSip:  natLocalSIP,
+					LocalMethodRtp:  natLocalRTP,
 				},
 			},
 			CongestionThreshold: sbc.NapCongestionThreshold{
