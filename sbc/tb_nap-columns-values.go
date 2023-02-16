@@ -17,6 +17,18 @@ func (c Client) TBNapColumnsValues() TBNapColumnsValues {
 	}
 }
 
+func (c TBNaps) GetColumnValues(config string, napName string) (*NapColumnValues, error) {
+	// nap name will be used
+	var columns *NapColumnValues
+
+	err := c.Client.Request("GET", "/configurations/"+config+"/nap_columns_values/"+napName, nil, &columns)
+	if err != nil {
+		return nil, err
+	}
+
+	return columns, nil
+}
+
 func (c TBNapColumnsValues) UpdateNapColumnValues(config string, napName string, values NapColumnValues) error {
 	err := c.Client.Request("PUT", "/configurations/"+config+"/nap_columns_values/"+napName, values, nil)
 	if err != nil {

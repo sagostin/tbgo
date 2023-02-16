@@ -37,7 +37,7 @@ func main() {
 	var fNapCreate = flag.Bool("create", false, "specify to use the creation flag")
 	var flagUpdate = flag.Bool("update", false, "specify to use the update flag")
 	var flagDelete = flag.Bool("delete", false, "specify to use the delete flag")
-	var flagNap = flag.Bool("nap", true, "defines what type of change to make, eg. nap, digitmap, etc")
+	var flagNap = flag.Bool("nap", false, "defines what type of change to make, eg. nap, digitmap, etc")
 	var flagPbx = flag.Bool("pbx", true, "defines if a nap is a pbx")
 
 	var fNapName = flag.String("customer", "", "customer name used in nap names and routedefs, etc")
@@ -53,8 +53,9 @@ func main() {
 	var fRdefRouteGroups = flag.String("rdefroutegroups", "", "routegroups to be modified/updated/etc in rdef")
 	var fNapcRouteGroups = flag.String("napcroutegroups", "", "routegroups to be modified/updated/etc in napc")
 	var fNAPProfile = flag.String("napprofile", "default", "nap profile to use when creating naps, default is default")
-	var fNAPProxyPoll = flag.Bool("napproxypoll", false, "enable nap proxy polling")
+	var fNAPProxyPoll = flag.Bool("napproxypoll", false, "specify wether to update this section of the cfg")
 	var fNAPProxyPollEnable = flag.Bool("napproxypollenable", false, "enable nap proxy polling (default is false, and is to disable)")
+	var fNapColumn = flag.Bool("napcolumns", false, "specify whether to update the nap columns of the provided info")
 
 	var fRemoteMethodSIP = flag.String("remote_method_sip", "None", "nat remote sip method")
 	var fRemoteMethodRTP = flag.String("remote_method_rtp", "None", "nat remote rtp method")
@@ -85,6 +86,7 @@ func main() {
 	napTotalCalls := *fMaxTotalCalls
 	napProxyPollEnable := *fNAPProxyPollEnable
 	napProxyPoll := *fNAPProxyPoll
+	napColumn := *fNapColumn
 
 	// nap NAT
 	natRemoteSIP := *fRemoteMethodSIP
@@ -144,9 +146,11 @@ func main() {
 		}
 	}
 
-	// update max total calls
+	// process updating for config
+
 	if fUpdate && fConfigNameStr != "" {
-		// if the update flag is set, proceed to check if they are wanting to update a nap, pbx, etc
+
+		// process the max call limit update request
 		if fNap && fNapNameStr != "" {
 			// todo update max call limit
 			nap, err := client.TBNaps().GetNap(fConfigNameStr, napName)
@@ -165,7 +169,24 @@ func main() {
 			return
 		}
 
-		// update proxy pollin (disable)
+		// update route group values in nap columns
+		if napColumn && fNapNameStr != "" {
+			v, err := client.TBNaps().GetColumnValues(fConfigNameStr, napName)
+			if err != nil {
+				log.Error(err)
+				return
+			}
+
+			v.RouteGroups = fNapcRouteGroupsCSV
+			valuesCopy := *v
+
+			client.TBNapColumnsValues().UpdateNapColumnValues(fConfigNameStr, napName, valuesCopy)
+
+			log.Info(valuesCopy)
+			return
+		}
+
+		// mass enable / disable proxy polling for all naps
 		if napProxyPoll {
 			getNaps, err := client.TBNaps().GetNames(fConfigNameStr)
 
@@ -195,6 +216,8 @@ func main() {
 				}
 				log.Info("Updated NAP for " + nap)
 			}
+
+			return
 		}
 	}
 
