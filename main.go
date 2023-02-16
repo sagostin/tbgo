@@ -53,8 +53,8 @@ func main() {
 	var fRdefRouteGroups = flag.String("rdefroutegroups", "", "routegroups to be modified/updated/etc in rdef")
 	var fNapcRouteGroups = flag.String("napcroutegroups", "", "routegroups to be modified/updated/etc in napc")
 	var fNAPProfile = flag.String("napprofile", "default", "nap profile to use when creating naps, default is default")
-	var fNAPProxyPoll = flag.Bool("napproxypoll", true, "enable nap proxy polling")
-	var fNAPProxyPollEnable = flag.Bool("napproxypollenable", true, "enable nap proxy polling")
+	var fNAPProxyPoll = flag.Bool("napproxypoll", false, "enable nap proxy polling")
+	var fNAPProxyPollEnable = flag.Bool("napproxypollenable", false, "enable nap proxy polling (default is false, and is to disable)")
 
 	var fRemoteMethodSIP = flag.String("remote_method_sip", "None", "nat remote sip method")
 	var fRemoteMethodRTP = flag.String("remote_method_rtp", "None", "nat remote rtp method")
@@ -185,8 +185,7 @@ func main() {
 					log.Error(err)
 					return
 				}
-
-				getNap.SipCfg.PollRemoteProxy = false
+				getNap.SipCfg.PollRemoteProxy = napProxyPollEnable
 				newNap := *getNap
 
 				err = client.TBNaps().UpdateNap(fConfigNameStr, newNap)
@@ -194,6 +193,7 @@ func main() {
 					log.Error(err)
 					return
 				}
+				log.Info("Updated NAP for " + nap)
 			}
 		}
 	}

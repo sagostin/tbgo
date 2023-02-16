@@ -55,7 +55,7 @@ type NapNatParams struct {
 }
 
 type NapSipCfg struct {
-	PollRemoteProxy           bool                  `json:"poll_remote_proxy,omitempty"`
+	PollRemoteProxy           bool                  `json:"poll_remote_proxy"`
 	AcceptOnlyAuthorizedUsers bool                  `json:"accept_only_authorized_users,omitempty"`
 	RegistrationParameters    NapRegistrationParams `json:"registration_parameters,omitempty"`
 	SipiParameters            NapSipiParams         `json:"sipi_parameters,omitempty"`
