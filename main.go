@@ -180,7 +180,11 @@ func main() {
 			v.RouteGroups = fNapcRouteGroupsCSV
 			valuesCopy := *v
 
-			client.TBNapColumnsValues().UpdateNapColumnValues(fConfigNameStr, napName, valuesCopy)
+			err = client.TBNapColumnsValues().UpdateNapColumnValues(fConfigNameStr, napName, valuesCopy)
+			if err != nil {
+				log.Error(err)
+				return
+			}
 
 			log.Info(valuesCopy)
 			return
