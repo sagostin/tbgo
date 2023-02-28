@@ -81,7 +81,7 @@ func main() {
 	fPortRangeStr := *fPortRange
 	fPhoneNumbersStr := *fPhoneNumbers
 	fNapProxyHostStr := *fNapProxyHost
-	fNapNameStr := *fNapName
+	fCustomerName := *fNapName
 	napProfile := *fNAPProfile
 	napTotalCalls := *fMaxTotalCalls
 	napProxyPollEnable := *fNAPProxyPollEnable
@@ -118,7 +118,7 @@ func main() {
 	// init the http client constructor thingy 🤪
 	client := sbc.NewClient(cfg)
 
-	napName := fNapNameStr
+	napName := fCustomerName
 	if fPbx {
 		napName = "pbx_" + napName
 	}
@@ -129,20 +129,47 @@ func main() {
 		// delete full naps (remove numbers, remove routedefs, etc.)
 
 		if len(phoneNumbers) > 0 && fDigitMapFile != "" {
-			_, err := client.TBFileDBs("File_DB").GetDigitMap(fConfigNameStr, fDigitMapFile)
+			dMap, err := client.TBFileDBs("File_DB").GetDigitMap(fConfigNameStr, fDigitMapFile)
 			if err != nil {
+				log.Error(err)
 				return
 			}
 
-			// todo
-			// get current list of numbers, and sort through them, removing the ones that had been previously provided
-			// and specified to be removed. remove the numbers from the array and send the updated version of digit map to it
+			var newDmap []sbc.TBDigitMap
+			// loop through digits in the digitmap
+			for _, d := range dMap {
+				// loop through numbers that are to be removed
+				match := false
+				for _, number := range phoneNumbers {
+					// check if customer name and called number match one of the numbers to be "deleted" from digitmap
+					if d.Called == number && d.RouteSetName == fCustomerName {
+						// set match as true for further processing
+						match = true
+						continue
+					}
+				}
 
-			// todo
-			// nap deletion, digitmaps need to be cleaned up, etc to be able to remove naps fully.
+				// if there wasn't a match on that number, add it to the new temp digitmap
+				if !match {
+					newDmap = append(newDmap, d)
+				} else {
+					log.Info("Found match for " + d.Called + ". Not adding to temporary digitmap. Deleting number...")
+				}
+				continue
+			}
 
-			// todo
-			//
+			/*for i := range dMap {
+				dMap[i] = dMap[len(dMap)-1]          // Copy last element to index i.
+				dMap[len(dMap)-1] = sbc.TBDigitMap{} // Erase last element (write zero value).
+				dMap = dMap[:len(dMap)-1]            // Truncate slice.
+				fmt.Println(dMap)                    //??
+			}*/
+
+			err = client.TBFileDBs("File_DB").UpdateDigitMap(fConfigNameStr, fDigitMapFile, newDmap)
+			if err != nil {
+				log.Error(err)
+				return
+			}
 		}
 	}
 
@@ -151,7 +178,7 @@ func main() {
 	if fUpdate && fConfigNameStr != "" {
 
 		// process the max call limit update request
-		if fNap && fNapNameStr != "" {
+		if fNap && fCustomerName != "" {
 			// todo update max call limit
 			nap, err := client.TBNaps().GetNap(fConfigNameStr, napName)
 			if err != nil {
@@ -170,7 +197,7 @@ func main() {
 		}
 
 		// update route group values in nap columns
-		if napColumn && fNapNameStr != "" {
+		if napColumn && fCustomerName != "" {
 			v, err := client.TBNaps().GetColumnValues(fConfigNameStr, napName)
 			if err != nil {
 				log.Error(err)
@@ -228,7 +255,7 @@ func main() {
 	// checks for flags
 	if fNapCreateBool && fPbx &&
 		fNap &&
-		fNapNameStr != "" &&
+		fCustomerName != "" &&
 		fPhoneNumbersStr != "" &&
 		fNapProxyHostStr != "" &&
 		fConfigNameStr != "" &&
@@ -282,7 +309,7 @@ func main() {
 				Called:  i,
 				Calling: "",
 				//todo friendlyify name to match scheme
-				RouteSetName: fNapNameStr,
+				RouteSetName: fCustomerName,
 			}
 
 			match, _ := regexp.MatchString("^(\\+\\d{1,2}\\s)?\\(?\\d{3}\\)?[\\s.-]?\\d{3}[\\s.-]?\\d{4}$", i)
@@ -296,7 +323,7 @@ func main() {
 
 		// todo create routeset routeDefFile
 		routeDefFile := sbc.TBFile{
-			Name: fNapNameStr + "_routedef.csv",
+			Name: fCustomerName + "_routedef.csv",
 		}
 
 		// makes the napname start nwith pbx
@@ -304,7 +331,7 @@ func main() {
 		// define a new route for the routedef routeDefFile
 		var routeDef []*sbc.TBRouteDef
 		route := &sbc.TBRouteDef{
-			RouteSetName: fNapNameStr,
+			RouteSetName: fCustomerName,
 			Priority:     10,
 			Weight:       50,
 			// todo includem routegroups in flags (eg. 55,11,12,32??)
