@@ -6,7 +6,6 @@ import (
 	"flag"
 	"github.com/gocarina/gocsv"
 	log "github.com/sirupsen/logrus"
-	"regexp"
 	"strconv"
 	"strings"
 	"tbgo/sbc"
@@ -158,13 +157,6 @@ func main() {
 				continue
 			}
 
-			/*for i := range dMap {
-				dMap[i] = dMap[len(dMap)-1]          // Copy last element to index i.
-				dMap[len(dMap)-1] = sbc.TBDigitMap{} // Erase last element (write zero value).
-				dMap = dMap[:len(dMap)-1]            // Truncate slice.
-				fmt.Println(dMap)                    //??
-			}*/
-
 			err = client.TBFileDBs("File_DB").UpdateDigitMap(fConfigNameStr, fDigitMapFile, newDmap)
 			if err != nil {
 				log.Error(err)
@@ -176,6 +168,29 @@ func main() {
 	// process updating for config
 
 	if fUpdate && fConfigNameStr != "" {
+
+		// if create flag is true and phone numbers is more than 0
+		// add numbers to the digitmap for the specified nap, but validate that it already exists
+		// we don't want people accidentally typing the wrong shit
+		if fNapCreateBool && len(phoneNumbers) > 0 {
+			// todo validate the nap already exists
+			digitMap, err := client.TBFileDBs("File_DB").GetDigitMap(fConfigNameStr, fDigitMapFile)
+			if err != nil {
+				log.Error(err)
+				return
+			}
+
+			updatedDigitmap, err := sbc.Append2Digitmap(fCustomerName, phoneNumbers, digitMap)
+			if err != nil {
+				return
+			}
+
+			err = client.TBFileDBs("File_DB").UpdateDigitMap(fConfigNameStr, fDigitMapFile, updatedDigitmap)
+			if err != nil {
+				log.Error(err)
+				return
+			}
+		}
 
 		// process the max call limit update request
 		if fNap && fCustomerName != "" {
@@ -272,54 +287,12 @@ func main() {
 			return
 		}
 
-		// copy to digitmaporig incase something fails
-		var digitMapOrig []sbc.TBDigitMap
-		copy(digitMapOrig, digitMap)
-
-		// split numbers fdrom flag and append to digitmap
-
-		for pN1, _ := range phoneNumbers {
-			for pN2, _ := range phoneNumbers {
-				if pN1 != pN2 {
-					if phoneNumbers[pN1] == phoneNumbers[pN2] {
-						log.Error("Duplicate numbers trying to be sent.")
-						return
-					}
-				}
-			}
+		updatedDigitmap, err := sbc.Append2Digitmap(fCustomerName, phoneNumbers, digitMap)
+		if err != nil {
+			return
 		}
 
-		var duplicateNumber = false
-		for _, i := range digitMap {
-			for _, i2 := range phoneNumbers {
-				if strings.Contains(i.Called, i2) {
-					duplicateNumber = true
-					log.Error("DigitMap already contains ", i2)
-				}
-			}
-		}
-
-		if duplicateNumber {
-			log.Fatalf("Duplicate numbers are being requested to be added to DigitMap")
-		}
-
-		for _, i := range phoneNumbers {
-			// create new item
-			newDigitMapping := sbc.TBDigitMap{
-				Called:  i,
-				Calling: "",
-				//todo friendlyify name to match scheme
-				RouteSetName: fCustomerName,
-			}
-
-			match, _ := regexp.MatchString("^(\\+\\d{1,2}\\s)?\\(?\\d{3}\\)?[\\s.-]?\\d{3}[\\s.-]?\\d{4}$", i)
-			if !match {
-				log.Fatalf("Something went wrong trying to validate the numbers. please check your numbers and try again.")
-			}
-
-			// append item
-			digitMap = append(digitMap, newDigitMapping)
-		}
+		// todo append items to digitmap function :)
 
 		// todo create routeset routeDefFile
 		routeDefFile := sbc.TBFile{
@@ -362,7 +335,7 @@ func main() {
 		//done creating routedef
 
 		// update digit map
-		err = client.TBFileDBs("File_DB").UpdateDigitMap(fConfigNameStr, fDigitMapFile, digitMap)
+		err = client.TBFileDBs("File_DB").UpdateDigitMap(fConfigNameStr, fDigitMapFile, updatedDigitmap)
 		if err != nil {
 			log.Error(err)
 			return
@@ -425,7 +398,7 @@ func main() {
 		if err != nil {
 			// update digit map
 			log.Warn("NAP creation failed. Reverting digit map.")
-			err = client.TBFileDBs("File_DB").UpdateDigitMap(fConfigNameStr, fDigitMapFile, digitMapOrig)
+			err = client.TBFileDBs("File_DB").UpdateDigitMap(fConfigNameStr, fDigitMapFile, digitMap)
 			if err != nil {
 				log.Error(err)
 				return
