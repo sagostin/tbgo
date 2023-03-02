@@ -182,6 +182,7 @@ func main() {
 
 			updatedDigitmap, err := sbc.Append2Digitmap(fCustomerName, phoneNumbers, digitMap)
 			if err != nil {
+				log.Error(err)
 				return
 			}
 
