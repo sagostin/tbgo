@@ -76,7 +76,7 @@ func (c Client) Request(method, endpoint string, data, response interface{}) err
 	// Construct endpoint URL
 	u, err := url.Parse(c.config.APIHost)
 	if err != nil {
-		return fmt.Errorf("hubspot.Client.Request(): url.Parse(): %v", err)
+		return fmt.Errorf("Client.Request(): url.Parse(): %v", err)
 	}
 	u.Path = path.Join(u.Path, endpoint)
 
@@ -105,7 +105,7 @@ func (c Client) Request(method, endpoint string, data, response interface{}) err
 		req, err = http.NewRequest(method, uri, nil)
 	}
 	if err != nil {
-		return fmt.Errorf("hubspot.Client.Request(): http.NewRequest(): %v", err)
+		return fmt.Errorf("Client.Request(): http.NewRequest(): %v", err)
 	}
 
 	// Headers
