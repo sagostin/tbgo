@@ -122,6 +122,8 @@ func main() {
 		napName = "pbx_" + napName
 	}
 
+	/*client.TBSystem().GetSystem("system_1")*/
+
 	// delete
 	if fDelete {
 		// delete single numbers or batch
@@ -290,6 +292,7 @@ func main() {
 
 		updatedDigitmap, err := sbc.Append2Digitmap(fCustomerName, phoneNumbers, digitMap)
 		if err != nil {
+			log.Error(err)
 			return
 		}
 
