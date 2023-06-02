@@ -5,10 +5,10 @@ import (
 	"encoding/json"
 	"flag"
 	"github.com/gocarina/gocsv"
+	"github.com/sagostin/tbgo/sbc"
 	log "github.com/sirupsen/logrus"
 	"strconv"
 	"strings"
-	"tbgo/sbc"
 )
 
 /** INFO */

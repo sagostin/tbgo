@@ -1,4 +1,4 @@
-module tbgo
+module github.com/sagostin/tbgo
 
 go 1.19
 

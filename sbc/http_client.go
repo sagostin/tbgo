@@ -18,8 +18,8 @@ import (
 
 // originally from https://github.com/leonelquinteros/hubspot/blob/master/client.go
 
-// ClientConfig object used for client creation
-type ClientConfig struct {
+// ApiSettings object used for client creation
+type ApiSettings struct {
 	APIHost     string
 	APIUsername string
 	APIPassword string
@@ -28,8 +28,8 @@ type ClientConfig struct {
 	TLSTimeout  time.Duration
 }
 
-// NewClientConfig constructs a ClientConfig object with the environment variables set as default
-func NewClientConfig() ClientConfig {
+// NewClientConfig constructs a ApiSettings object with the environment variables set as default
+func NewClientConfig() ApiSettings {
 	apiHost := "https://localhost:12358"
 	var apiUsername string
 	var apiPassword string
@@ -44,7 +44,7 @@ func NewClientConfig() ClientConfig {
 		apiPassword = os.Getenv("TB_PASSWORD")
 	}
 
-	return ClientConfig{
+	return ApiSettings{
 		APIHost:     apiHost,
 		APIUsername: apiUsername,
 		APIPassword: apiPassword,
@@ -56,11 +56,11 @@ func NewClientConfig() ClientConfig {
 
 // Client object
 type Client struct {
-	config ClientConfig
+	config ApiSettings
 }
 
 // NewClient constructor
-func NewClient(config ClientConfig) Client {
+func NewClient(config ApiSettings) Client {
 	return Client{
 		config: config,
 	}
