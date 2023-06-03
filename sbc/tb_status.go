@@ -1,5 +1,10 @@
 package sbc
 
+import (
+	"fmt"
+	"reflect"
+)
+
 // TBStatus client
 type TBStatus struct {
 	Client
@@ -340,81 +345,8 @@ type Status struct {
 		UpCnt            int  `json:"up_cnt"`
 		ErrorThreshold   int  `json:"error_threshold"`
 	} `json:"bits"`
-	CallLegs struct {
-		IncomingLegsHighest                int    `json:"incoming_legs_highest"`
-		ResetStats                         string `json:"reset_stats"`
-		OutgoingLegsAnsweredRate           int    `json:"outgoing_legs_answered_rate"`
-		TotalOutgoingLegsAccepted          int    `json:"total_outgoing_legs_accepted"`
-		FilePlaybacks                      int    `json:"file_playbacks"`
-		OutgoingLegsAnsweredRateHighest    int    `json:"outgoing_legs_answered_rate_highest"`
-		IncomingLegs                       int    `json:"incoming_legs"`
-		CallLegsAnsweredRate               int    `json:"call_legs_answered_rate"`
-		OutgoingLegsAnsweredHighest        int    `json:"outgoing_legs_answered_highest"`
-		TotalMediaOnlyLegs                 int    `json:"total_media_only_legs"`
-		OutgoingLegsRate                   int    `json:"outgoing_legs_rate"`
-		TotalOutgoingLegsFilePlaybacks     int    `json:"total_outgoing_legs_file_playbacks"`
-		IncomingLegsAnsweredRate           int    `json:"incoming_legs_answered_rate"`
-		TotalIncomingEmergencyLegs         int    `json:"total_incoming_emergency_legs"`
-		OutgoingLegs                       int    `json:"outgoing_legs"`
-		MediaOnlyLegs                      int    `json:"media_only_legs"`
-		FileRecordings                     int    `json:"file_recordings"`
-		MediaOnlyLegsHighest               int    `json:"media_only_legs_highest"`
-		IncomingLegsAnsweredRateHighest    int    `json:"incoming_legs_answered_rate_highest"`
-		TotalIncomingLegsAnswered          int    `json:"total_incoming_legs_answered"`
-		IncomingLegsAcceptedRateHighest    int    `json:"incoming_legs_accepted_rate_highest"`
-		CallLegsSetup                      int    `json:"call_legs_setup"`
-		IncomingLegsRate                   int    `json:"incoming_legs_rate"`
-		TotalOutgoingLegsFileRecordings    int    `json:"total_outgoing_legs_file_recordings"`
-		TotalCallLegsAccepted              int    `json:"total_call_legs_accepted"`
-		OutgoingLegsSetup                  int    `json:"outgoing_legs_setup"`
-		TotalIncomingLegsFileRecordings    int    `json:"total_incoming_legs_file_recordings"`
-		IncomingLegsAcceptedRate           int    `json:"incoming_legs_accepted_rate"`
-		OutgoingLegsTerminating            int    `json:"outgoing_legs_terminating"`
-		OutgoingLegsAcceptedRateHighest    int    `json:"outgoing_legs_accepted_rate_highest"`
-		CallLegsAcceptedRateHighest        int    `json:"call_legs_accepted_rate_highest"`
-		TotalIncomingLegsFilePlaybacks     int    `json:"total_incoming_legs_file_playbacks"`
-		CallLegsAnsweredHighest            int    `json:"call_legs_answered_highest"`
-		IncomingLegsAnsweredHighest        int    `json:"incoming_legs_answered_highest"`
-		IncomingEmergencyLegsRateHighest   int    `json:"incoming_emergency_legs_rate_highest"`
-		CallLegsRate                       int    `json:"call_legs_rate"`
-		CallLegsAnsweredRateHighest        int    `json:"call_legs_answered_rate_highest"`
-		CallLegsRateHighest                int    `json:"call_legs_rate_highest"`
-		CallLegsTerminating                int    `json:"call_legs_terminating"`
-		OutgoingLegsAcceptedRate           int    `json:"outgoing_legs_accepted_rate"`
-		IncomingEmergencyLegsRate          int    `json:"incoming_emergency_legs_rate"`
-		TotalOutgoingLegsInterceptions     int    `json:"total_outgoing_legs_interceptions"`
-		TotalIncomingEmergencyLegsAnswered int    `json:"total_incoming_emergency_legs_answered"`
-		TotalMediaOnlyLegsFileRecordings   int    `json:"total_media_only_legs_file_recordings"`
-		TotalIncomingLegsInterceptions     int    `json:"total_incoming_legs_interceptions"`
-		TotalCallLegsInterceptions         int    `json:"total_call_legs_interceptions"`
-		TotalCallLegsFilePlaybacks         int    `json:"total_call_legs_file_playbacks"`
-		TotalOutgoingLegsAnswered          int    `json:"total_outgoing_legs_answered"`
-		IncomingEmergencyLegsHighest       int    `json:"incoming_emergency_legs_highest"`
-		TotalMediaOnlyLegsInterceptions    int    `json:"total_media_only_legs_interceptions"`
-		TotalCallLegs                      int    `json:"total_call_legs"`
-		TotalMediaOnlyLegsFilePlaybacks    int    `json:"total_media_only_legs_file_playbacks"`
-		TotalIncomingLegs                  int    `json:"total_incoming_legs"`
-		TotalIncomingLegsAccepted          int    `json:"total_incoming_legs_accepted"`
-		IncomingLegsAnswered               int    `json:"incoming_legs_answered"`
-		TotalOutgoingLegs                  int    `json:"total_outgoing_legs"`
-		CallLegsAcceptedRate               int    `json:"call_legs_accepted_rate"`
-		OutgoingLegsHighest                int    `json:"outgoing_legs_highest"`
-		Interceptions                      int    `json:"interceptions"`
-		MediaOnlyLegsRateHighest           int    `json:"media_only_legs_rate_highest"`
-		IncomingEmergencyLegs              int    `json:"incoming_emergency_legs"`
-		TotalCallLegsAnswered              int    `json:"total_call_legs_answered"`
-		MediaOnlyLegsRate                  int    `json:"media_only_legs_rate"`
-		OutgoingLegsAnswered               int    `json:"outgoing_legs_answered"`
-		CallLegs                           int    `json:"call_legs"`
-		IncomingLegsRateHighest            int    `json:"incoming_legs_rate_highest"`
-		IncomingLegsSetup                  int    `json:"incoming_legs_setup"`
-		TotalCallLegsFileRecordings        int    `json:"total_call_legs_file_recordings"`
-		CallLegsAnswered                   int    `json:"call_legs_answered"`
-		IncomingLegsTerminating            int    `json:"incoming_legs_terminating"`
-		CallLegsHighest                    int    `json:"call_legs_highest"`
-		OutgoingLegsRateHighest            int    `json:"outgoing_legs_rate_highest"`
-	} `json:"call_legs"`
-	TmsIp struct {
+	CallLegs CallLegs `json:"call_legs"`
+	TmsIp    struct {
 		WarningThreshold         int `json:"warning_threshold"`
 		FromNetNbOutOfSeqPackets int `json:"from_net_nb_out_of_seq_packets"`
 		FromNetNbPackets         int `json:"from_net_nb_packets"`
@@ -464,4 +396,92 @@ type Status struct {
 		HighVoipUsageList         struct {
 		} `json:"high_voip_usage_list"`
 	} `json:"adapters_usage"`
+}
+
+type CallLegs struct {
+	IncomingLegsHighest                int    `json:"incoming_legs_highest"`
+	ResetStats                         string `json:"reset_stats"`
+	OutgoingLegsAnsweredRate           int    `json:"outgoing_legs_answered_rate"`
+	TotalOutgoingLegsAccepted          int    `json:"total_outgoing_legs_accepted"`
+	FilePlaybacks                      int    `json:"file_playbacks"`
+	OutgoingLegsAnsweredRateHighest    int    `json:"outgoing_legs_answered_rate_highest"`
+	IncomingLegs                       int    `json:"incoming_legs"`
+	CallLegsAnsweredRate               int    `json:"call_legs_answered_rate"`
+	OutgoingLegsAnsweredHighest        int    `json:"outgoing_legs_answered_highest"`
+	TotalMediaOnlyLegs                 int    `json:"total_media_only_legs"`
+	OutgoingLegsRate                   int    `json:"outgoing_legs_rate"`
+	TotalOutgoingLegsFilePlaybacks     int    `json:"total_outgoing_legs_file_playbacks"`
+	IncomingLegsAnsweredRate           int    `json:"incoming_legs_answered_rate"`
+	TotalIncomingEmergencyLegs         int    `json:"total_incoming_emergency_legs"`
+	OutgoingLegs                       int    `json:"outgoing_legs"`
+	MediaOnlyLegs                      int    `json:"media_only_legs"`
+	FileRecordings                     int    `json:"file_recordings"`
+	MediaOnlyLegsHighest               int    `json:"media_only_legs_highest"`
+	IncomingLegsAnsweredRateHighest    int    `json:"incoming_legs_answered_rate_highest"`
+	TotalIncomingLegsAnswered          int    `json:"total_incoming_legs_answered"`
+	IncomingLegsAcceptedRateHighest    int    `json:"incoming_legs_accepted_rate_highest"`
+	CallLegsSetup                      int    `json:"call_legs_setup"`
+	IncomingLegsRate                   int    `json:"incoming_legs_rate"`
+	TotalOutgoingLegsFileRecordings    int    `json:"total_outgoing_legs_file_recordings"`
+	TotalCallLegsAccepted              int    `json:"total_call_legs_accepted"`
+	OutgoingLegsSetup                  int    `json:"outgoing_legs_setup"`
+	TotalIncomingLegsFileRecordings    int    `json:"total_incoming_legs_file_recordings"`
+	IncomingLegsAcceptedRate           int    `json:"incoming_legs_accepted_rate"`
+	OutgoingLegsTerminating            int    `json:"outgoing_legs_terminating"`
+	OutgoingLegsAcceptedRateHighest    int    `json:"outgoing_legs_accepted_rate_highest"`
+	CallLegsAcceptedRateHighest        int    `json:"call_legs_accepted_rate_highest"`
+	TotalIncomingLegsFilePlaybacks     int    `json:"total_incoming_legs_file_playbacks"`
+	CallLegsAnsweredHighest            int    `json:"call_legs_answered_highest"`
+	IncomingLegsAnsweredHighest        int    `json:"incoming_legs_answered_highest"`
+	IncomingEmergencyLegsRateHighest   int    `json:"incoming_emergency_legs_rate_highest"`
+	CallLegsRate                       int    `json:"call_legs_rate"`
+	CallLegsAnsweredRateHighest        int    `json:"call_legs_answered_rate_highest"`
+	CallLegsRateHighest                int    `json:"call_legs_rate_highest"`
+	CallLegsTerminating                int    `json:"call_legs_terminating"`
+	OutgoingLegsAcceptedRate           int    `json:"outgoing_legs_accepted_rate"`
+	IncomingEmergencyLegsRate          int    `json:"incoming_emergency_legs_rate"`
+	TotalOutgoingLegsInterceptions     int    `json:"total_outgoing_legs_interceptions"`
+	TotalIncomingEmergencyLegsAnswered int    `json:"total_incoming_emergency_legs_answered"`
+	TotalMediaOnlyLegsFileRecordings   int    `json:"total_media_only_legs_file_recordings"`
+	TotalIncomingLegsInterceptions     int    `json:"total_incoming_legs_interceptions"`
+	TotalCallLegsInterceptions         int    `json:"total_call_legs_interceptions"`
+	TotalCallLegsFilePlaybacks         int    `json:"total_call_legs_file_playbacks"`
+	TotalOutgoingLegsAnswered          int    `json:"total_outgoing_legs_answered"`
+	IncomingEmergencyLegsHighest       int    `json:"incoming_emergency_legs_highest"`
+	TotalMediaOnlyLegsInterceptions    int    `json:"total_media_only_legs_interceptions"`
+	TotalCallLegs                      int    `json:"total_call_legs"`
+	TotalMediaOnlyLegsFilePlaybacks    int    `json:"total_media_only_legs_file_playbacks"`
+	TotalIncomingLegs                  int    `json:"total_incoming_legs"`
+	TotalIncomingLegsAccepted          int    `json:"total_incoming_legs_accepted"`
+	IncomingLegsAnswered               int    `json:"incoming_legs_answered"`
+	TotalOutgoingLegs                  int    `json:"total_outgoing_legs"`
+	CallLegsAcceptedRate               int    `json:"call_legs_accepted_rate"`
+	OutgoingLegsHighest                int    `json:"outgoing_legs_highest"`
+	Interceptions                      int    `json:"interceptions"`
+	MediaOnlyLegsRateHighest           int    `json:"media_only_legs_rate_highest"`
+	IncomingEmergencyLegs              int    `json:"incoming_emergency_legs"`
+	TotalCallLegsAnswered              int    `json:"total_call_legs_answered"`
+	MediaOnlyLegsRate                  int    `json:"media_only_legs_rate"`
+	OutgoingLegsAnswered               int    `json:"outgoing_legs_answered"`
+	CallLegs                           int    `json:"call_legs"`
+	IncomingLegsRateHighest            int    `json:"incoming_legs_rate_highest"`
+	IncomingLegsSetup                  int    `json:"incoming_legs_setup"`
+	TotalCallLegsFileRecordings        int    `json:"total_call_legs_file_recordings"`
+	CallLegsAnswered                   int    `json:"call_legs_answered"`
+	IncomingLegsTerminating            int    `json:"incoming_legs_terminating"`
+	CallLegsHighest                    int    `json:"call_legs_highest"`
+	OutgoingLegsRateHighest            int    `json:"outgoing_legs_rate_highest"`
+}
+
+func (c CallLegs) JsonFields() []string {
+	val := reflect.ValueOf(c)
+
+	var fields []string
+
+	for i := 0; i < val.Type().NumField(); i++ {
+		fmt.Println(val.Type().Field(i).Tag.Get("json"))
+		fields = append(fields, val.Type().Field(i).Tag.Get("json"))
+	}
+
+	return fields
 }
